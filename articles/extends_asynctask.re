@@ -1,0 +1,2 @@
+= AsyncTaskの拡張
+

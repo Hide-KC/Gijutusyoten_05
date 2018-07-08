@@ -2,7 +2,10 @@ PREDEF:
   - preface.re
 
 CHAPS:
-  - article.re
+  - what_twitter_api.re
+  - enviroment.re
+  - register_app.re
+  - oauth.re
 
 APPENDIX:
 
