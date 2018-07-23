@@ -15,17 +15,18 @@
  
 
 
-- はじめに
-- Twitter APIとtwitter4j
+- はじめに_preface
+ - 本書の環境
+- Twitter APIとtwitter4j_whats_api
  - Twitter APIとは
   - Column Streaming APIの廃止
  - twitter4jの利用
  - OAuth認証の説明
 
-- アプリケーションの設計
+- アプリケーションの設計_app_design
  - どういうサンプルアプリを作るのか
  - フロー説明
-- アプリケーションの構築
+- アプリケーションの構築_app_structure
  - 環境構築
  - アプリケーションの登録
  - プロジェクトの作成
@@ -35,9 +36,9 @@
   - AsyncTask拡張、コールバック実装　←概要だけ。付録に記載
  - AVDの生成
  - 動作確認
-- まとめ
+- まとめ_conclusion
 
-- 付録A
+- 付録A_appendix_a
  - AsyncTask拡張、コールバック実装
 
 :

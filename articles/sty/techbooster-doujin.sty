@@ -40,6 +40,7 @@
     \markboth{#1}{#1}
   \fi}
 \renewcommand{\headfont}{\gtfamily\sffamily\bfseries}
+\renewcommand{\reviewtitlefont}{\gtfamily\sffamily\bfseries}
 
 \fancypagestyle{plainhead}{%
 \fancyhead{}
@@ -152,7 +153,3 @@
 \renewcommand{\reviewcolumnhead}[2]{%
 {\noindent\large\sffamily #2}
 \vspace{\baselineskip}}
-
-%%シングルクォート対応
-\usepackage{upquote,textcomp}
-\xspcode`'=0

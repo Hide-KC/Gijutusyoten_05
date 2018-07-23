@@ -2,12 +2,12 @@ PREDEF:
   - preface.re
 
 CHAPS:
-  - what_twitter_api.re
-  - enviroment.re
-  - register_app.re
-  - oauth.re
+  - whats_api.re
+  - app_design.re
+  - app_structure.re
 
 APPENDIX:
+  - appendix_a.re
 
 POSTDEF:
   - contributors.re
