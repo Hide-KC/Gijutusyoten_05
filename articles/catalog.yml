@@ -10,4 +10,5 @@ APPENDIX:
   - appendix_a.re
 
 POSTDEF:
+  - afterword.re
   - contributors.re

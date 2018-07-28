@@ -145,7 +145,7 @@ titlepage: true
 # titlefile: null
 #
 # 原書大扉ページにするHTMLファイル。ファイル名を指定すると原書大扉として入る
-# originaltitlefile: null
+# originaltitlefile: _cover.html
 #
 # 権利表記ページファイル。ファイル名を指定すると権利表記として入る
 # creditfile: null
