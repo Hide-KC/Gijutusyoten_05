@@ -13,7 +13,7 @@ Android StudioでTwitterアプリを作りました@<fn>{atogaki}。
 はじめてAndroid StudioでTwitterアプリを製作する方や、Twitterの認証関係で挫折した方、
 またはじめてAndroidのアプリを製作する方の役に立つことができればいいなと思います。
 
-
+Spectre13からの初期コミットあんどPush
 
 
 
