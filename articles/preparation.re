@@ -1,0 +1,1 @@
+={preparation} Kotlinの基本文法

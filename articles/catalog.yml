@@ -2,9 +2,9 @@ PREDEF:
   - preface.re
 
 CHAPS:
-  - whats_api.re
-  - app_design.re
-  - app_structure.re
+  - preparation.re
+  - implements.re
+  - create-app.re
 
 APPENDIX:
   - appendix_a.re
