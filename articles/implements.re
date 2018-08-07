@@ -79,7 +79,7 @@ Fragmentの初期化はonCreateView内でgetArgumentsしてBundleから初期化
 どんどん肥大化するためお勧めできません。
 
 === Fragmentの親子間通信
-子Fragmentから親、またFragment間でイベントを通知するにはinterfaceを使いましょう。
+子Fragmentから親、またFragment間でイベントを通知するにはinterfaceを使います。
 @<list>{notify_Java}では、子1→親→子2の順でイベントの通知を行っています。
 
 //listnum[notify_Java][親子間通信-Java]{
@@ -172,7 +172,7 @@ class MyFragment2: Fragment{
 }
 //}
 
-注意としては、子1→子2のように、直接の親子関係がないFragment間で参照するのはやめましょう。
+注意としては、子1→子2のように、直接の親子関係がないFragment間で参照するのは避けたほうが良いようです。
 Fragment同士の結びつきが強くなり、後々の追加・修正時に泣きを見ます。
 
 Kotlinはスマートキャストにより、ifブロック内でいちいちキャストをしなくて済むため
@@ -189,8 +189,15 @@ ListViewにセットします。
 //}
 
 //listnum[dto][SampleDTO]{
+//Java
 class SampleDTO{
     String name; int resId;
+}
+
+//Kotlinではdata classが使える
+data class SampleDTO{
+    val name: String,
+    val resId: Int
 }
 //}
 
@@ -276,37 +283,132 @@ Kotlinではエルビス演算子@<fn>{elbis}（?:）とスコープ関数（als
 //listnum[view_java][カスタムView-Java]{
 class MyView extends View{
     public MyViewJava(Context context){
-        super(context, null);
+        super(context, null); //1
     }
 
     public MyViewJava(Context context, AttributeSet attrs){
-        super(context, attrs);
+        super(context, attrs); //2
     }
 
     public MyViewJava(Context context, AttributeSet attrs, int defStyleAttr){
-        super(context, attrs, defStyleAttr);
+        super(context, attrs, defStyleAttr); //3
     }
 
+    @Override
+    public void onDraw(Canvas canvas){
+        super.onDraw(canvas);
+        //円を書いたり塗りつぶしたり
+    }
 
+    @Override
+    public boolean onTouchEvent(MotionEvent event){
+        //event.x, event.yからローカル座標取得
+    }
 }
 //}
 
 //listnum[view_kotlin][カスタムView-Kotlin]{
 class MyView: View {
-    constructor(context: Context): super(context, null)
-    constructor(context: Context, attrs: AttributeSet?)
-     : super(context, attrs)
+    constructor(context: Context): super(context, null) //1
+    constructor(context: Context, attrs: AttributeSet?) 
+     : super(context, attrs) //2
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int)
-     : super(context, attrs, defStyleAttr)
+     : super(context, attrs, defStyleAttr) //3
 
-    
+    override fun onDraw(canvas: Canvas?){
+        super.onDraw(canvas)
+        //円を書いたり塗りつぶしたり
+    }
+
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        //event.x, event.yからローカル座標取得
+    }
 }
 //}
 
-Kotlinのコンストラクタは誌面の都合上改行していますが、普通に書けば３行になります。
+カスタムViewのコンストラクタは、少なくとも次の１～３を必ずoverrideしてください。
+overrideしないとなぜか描画されません（待て）。
+Qiitaの記事@<fn>{view_fn}によると次のとおり呼び出されるようです。
 
+//quote{
+1. コードでViewを生成したときのコンストラクタ
+
+2. XMLからViewをinflateした際のコンストラクタ
+
+3. XMLからinflateして、Themeからクラス固有の基本スタイルを適用します
+
+4. XMLからinflateして、Themeからクラス固有の基本スタイルまたは指定のスタイルを適用します
+//}
+
+//footnote[view_fn][Viewの4つのコンストラクタ　https://qiita.com/alzybaad/items/aca3049b6a13ab78f945]
+
+４つめのコンストラクタはLollipopから追加されたもので、Lollipop未満では例外を発報するため
+バージョン分岐等の措置が必要になります……が、実際overrideしなくても動きますね。
+このため@<list>{view_java}にも記載はしていません。すみません。
+
+Viewの定義が終わったら、Android Studioのメニューバーから Build→Rebuild Project
+をしてやることで、LayoutEditorのPallet→ProjectにカスタムViewが表示されます。
+あとは他のViewと同じようにxmlで配置してください。
+
+=== カスタムLayout（ConstraintLayoutの拡張）
+あまり需要はないかもしれませんが、カスタムLayoutについても少し記述します。
+といっても、筆者はFrameLayoutとConstraintLayoutを拡張したカスタムLayoutしか作ったことがないので、
+参考程度にお読みください。
+
+基本はカスタムViewと同様で、コンストラクタのoverrideも同様に行ってください。
+ConstraintLayout特有の制約（Constraint）の付け方を@<list>{constraint}に示します。
+ついでに何かと便利なGuidelineも生成します。
+
+//listnum[constraint][ConstraintLayoutの初期化-Kotlin]{
+//Guideline用のId。フィールドに保持。
+val leftId = View.generateViewId()
+val topId = View.generateViewId()
+val resId = View.generateViewId()
+
+init{
+    //ImageViewの生成、追加
+    val image = ImageView(context).also{ it.id = resId }
+    this.addView(image)
+    
+    //ConstraintSetの生成
+    val constraintSet = ConstraintSet()
+    constraintSet.clone(this)
+
+    //Vertical Guidelineの生成
+    constraintSet.create(leftId, ConstraintSet.VERTICAL_GUIDELINE)
+    constraintSet.setGuidelinePercent(leftId, 0f)
+
+    //Horizontal Guidelineの生成
+    constraintSet.create(topId, ConstraintSet.HORIZONTAL_GUIDELINE)
+    constraintSet.setGuidelinePercent(topId, 0f)
+
+    //Guidelineへの制約付けと親コンテナへの制約付け
+    //resIdはLayoutに配置されているViewのID
+    constraintSet.connect(resId, ConstraintSet.START,
+                          leftId, ConstraintSet.START)
+    constraintSet.connect(resId, ConstraintSet.TOP,
+                          topId, ConstraintSet.TOP)
+    constraintSet.connect(resId, ConstraintSet.END,
+                          ConstraintSet.PARENT_ID, ConstraintSet.END)
+    constraintSet.connect(resId, ConstraintSet.BOTTOM,
+                          ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM)
+
+    //Match Constarintの設定
+    constraintSet.constrainWidth(resId, ConstraintSet.MATCH_CONSTRAINT)
+    constraintSet.constrainHeight(resId, ConstraintSet.MATCH_CONSTRAINT)
+
+    //設定の適用。
+    constraintSet.applyTo(this)
+}
+//}
+
+constraintSetインスタンスにいったんcloneして、ごにょごにょ制約を付けた後、applyToで適用するという流れです。
+コードで生成したImageViewのTopとLeft（START）をGuidelineに、BottomとRight（END）を親コンテナに紐づけてます。
+親コンテナのIDはConstraintSet.PARENT_IDで取得できます。
 
 == カスタムPreference
+
+
 == TabLayout
 == Toolbar
 == DrawerLayout
