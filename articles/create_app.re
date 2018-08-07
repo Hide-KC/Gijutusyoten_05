@@ -1,4 +1,4 @@
-={create-app} Twitterアプリの設計
+={create_app} Twitterアプリの設計
 本章では、どのようなTwitterアプリを作るか考えます。
 
 == アプリの動作

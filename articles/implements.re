@@ -1,7 +1,7 @@
 ={implements} 実装集
 //lead{
 本章は、JavaとKotlinにてよくあるAndroidアプリの実装を集めました。
-本章単体でも読めますが、@<chapref>{create-app}もあわせてお読みいただければ、
+本章単体でも読めますが、@<chapref>{create_app}もあわせてお読みいただければ、
 より理解が深まるかと思います。
 //}
 
