@@ -178,9 +178,9 @@ class MyFragment2: Fragment{
 }
 //}
 
-注意としては、子1→子2のように、直接の親子関係がないFragment間で参照するのは避けたほうが良いようです。
-Fragment同士の結びつきが強くなり、後々の追加・修正時に泣きを見ます。なおFragmentからDialogFragmentを
-生成した場合などはこの限りではありません。
+注意としては、子1→子2のように、直接の親子関係がないFragment間で参照するのは避けたほうがいいようです。
+受信側のFragmentが必ずしも生きているとは限りませんし、またFragment同士の結びつきが強くなり、
+後々の追加・修正時に泣きを見ます。
 
 Kotlinはスマートキャストにより、ifブロック内でいちいちキャストをしなくて済むため
 だいぶスッキリ書けますね。Kotlinはいいぞ。
@@ -220,7 +220,7 @@ class MyAdapter extends ArrayAdapter<SampleDTO>{
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView,
-                                      @NonNull ViewGroup parent) {
+                        @NonNull ViewGroup parent) {
         final ItemViewHolder holder;
 
         if(convertView == null){
@@ -357,6 +357,8 @@ Viewの定義が終わったら、Android Studioのメニューバーから Buil
 をしてやることで、LayoutEditorのPallet→ProjectにカスタムViewが表示されます。
 あとは他のViewと同じようにxmlで配置してください。
 
+見返したらイマイチ薄味な内容になってしまったので、付録に自作カラーピッカーの実装載せておきます。よしなに。
+
 === カスタムLayout（ConstraintLayoutの拡張）
 あまり需要はないかもしれませんが、カスタムLayoutについても少し記述します。
 といっても、筆者はFrameLayoutとConstraintLayoutを拡張したカスタムLayoutしか作ったことがないので、
@@ -472,7 +474,7 @@ class MyPreference extends Preference{
         //Layoutのinfrate
         super.onCreateView(parent);
         LayoutInflater inflater = LayoutInflater.from(getContext());
-        //TextView, CheckBoxを配したレイアウトを展開する
+        //TextView × 2, CheckBoxを配したレイアウトを展開する
         return inflater.inflate(R.layout.my_preference, parent,false);
     }
 
@@ -530,13 +532,82 @@ onBindViewでプロパティ設定等の処理を行っています。onCreateVi
 
 view.setOnClickListenerでは@<img>{preference}のダイアログ表示を仕込みます。
 なお、カスタムPreferenceの内容からは離れてしまいますので詳細は省きますが、
-ダイアログのOKボタンを押した後、onBindViewが走らない@<b>{こともある}ので、
+ダイアログのOKボタンを押した後、onBindViewが走らない@<b>{ことがある}ので、
 コールバックインターフェースを実装するなどにより確実に値更新をしてやってください。
 DialogFragmentとコールバックの実装は別途GitHubに上げておきます（あとがき参照）。
 
 //footnote[onbindview][http://ksoichiro.blogspot.com/2011/05/android-preference.html]
+//footnote[dialog_result][ソフトキーボードの表示・非表示時にonBindViewが走るよう。]
 
-== TabLayout
-== Toolbar
-== DrawerLayout
+#@# == TabLayout
+#@# == Toolbar
+#@# == DrawerLayout
 == 非同期処理（AsyncTask拡張）
+AsyncTaskクラスは、非同期処理を実現する方法の中でもかなり簡単に実装できるクラスです。
+ただし、非同期処理の結果をUIスレッドに返すときに少し注意が必要です。
+
+AsyncTaskクラスを継承して書くなら@<list>{task_in_other}、匿名クラスで書くなら@<list>{task_in_noname}のようになるでしょうか。
+
+//listnum[task_in_other][継承してSampleTaskを定義-Kotlin]{
+open class SampleTask: AsyncTask<Void, Void, Int>() {
+    //SampleTaskクラスではworkerスレッドでの処理に集中。
+    override fun doInBackground(vararg params: Void?): Int {
+        //workerスレッドでの処理
+        return 0
+    }
+}
+
+class SampleClass{
+    //UI側の処理に集中するため、onPostExecuteのみoverride。
+    //TestTaskをopenにしないとoverrideできないので注意。
+    fun taskRun(){
+        val task = object : TestTask(){
+            override fun onPostExecute(result: Int?) {
+                super.onPostExecute(result)
+            }
+        }
+    }
+}
+//}
+
+//listnum[task_in_noname][匿名クラスでの定義-Kotlin]{
+class SampleClass{
+    fun taskRun(){
+        val task = object : AsyncTask<Int, Int, Int>() {
+            override fun onPreExecute() {
+                super.onPreExecute()
+                //UIの操作が可能。処理中のDialogFragmentを表示したり。
+            }
+            
+            //doInBackgroudだけoverride必須
+            override fun doInBackground(vararg params: Int?): Int {
+                //workerスレッドで行う処理。UIは操作不可！
+                publishProgress() //onProgressUpdateのコール
+                return 0
+            }
+
+            override fun onProgressUpdate(vararg values: Int?) {
+                super.onProgressUpdate(*values)
+                //ここもUIの操作が可能
+            }
+
+            override fun onPostExecute(result: Int?) {
+                super.onPostExecute(result)
+                //UIに結果を反映したりいろいろ
+            }
+        }
+        task.execute()
+    }
+}
+//}
+
+@<list>{task_in_other}だと、引数の型や処理が変わるたびにクラスが増えていくので、匿名クラスでの記述のほうが
+使い勝手いい気がします。ただしStrategyパターンとかでworkerスレッドの処理をごそっと入れ替える場合は、
+クラスを別に作るほかありませんね。
+
+Kotlinで複数のメソッドをoverrideする場合は、object : AsyncTask<~>のように書く必要があります（オブジェクト式@<fn>{kotlin_object}）。
+また@<list>{task_in_other}のように別クラスで記述する場合は、openを付けて継承可能にしないとoverrideできません。
+
+//footnote[kotlin_object][https://dogwood008.github.io/kotlin-web-site-ja/docs/reference/object-declarations.html]
+
+

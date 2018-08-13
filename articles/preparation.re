@@ -1,1 +1,1 @@
-={preparation} Kotlinの基本文法
+={preparation} Kotlinはいいぞ
