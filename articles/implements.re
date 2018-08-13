@@ -10,8 +10,9 @@ staticなnewInstanceメソッドを定義して生成するのが定番ですね
 Kotlinではcompanion object内にメソッドを定義することで、クラス名.newInstance()としてコールできます。
 
 //listnum[fragment_java][Fragmentの生成-Java]{
+//Activity内のメソッド
 public void createFragment(){
-    Fragment fragment = JavaFragment.newInstance("KC");
+    Fragment fragment = JavaFragment.newInstance(null, "Sample");
     FragmentTransaction transaction =
         getSupportFragmentManager().beginTransaction();
     transaction.add(fragment, "sample");
@@ -35,15 +36,18 @@ class JavaFragment extends Fragment{
         Bundle args = new Bundle();
         args.putString("name", name);
         fragment.setArguments(args);
-        fragment.setTargetFragment(target, 0);
+        if (target != null){
+            fragment.setTargetFragment(target, 0);
+        }
         return fragment;
     }
 }
 //}
 
 //listnum[fragment_kotlin][Fragmentの生成-Kotlin]{
+//Activity内のメソッド
 fun createFragment(){
-    val fragment = KotlinFragment.newInstance("KC")
+    val fragment = KotlinFragment.newInstance(null, "Sample")
     val transaction = supportFragmentManager.beginTransaction()
     transaction.add(fragment, "sample")
     transaction.commit()
@@ -63,7 +67,9 @@ class KotlinFragment: Fragment(){
             val args = Bundle()
             args.putString("name", name)
             fragment.arguments = args
-            fragment.setTargetFragment(target, 0)
+            if (target != null){
+                fragment.setTargetFragment(target, 0)
+            }
             return fragment
         }
     }
@@ -75,8 +81,8 @@ onCreateから読み込まれるため、正常に初期化が行われない可
 Fragmentの初期化はonCreateView内でgetArgumentsしてBundleから初期化に必要な値を
 取得するようにしましょう。なんかルー大柴っぽい。
 
-一応呼び出し側（Activityなど）でsetArgumentsしても大丈夫ですが、呼び出し側が
-どんどん肥大化するためお勧めできません。
+一応呼び出し側（Activityなど）でsetArgumentsしても大丈夫ですが、呼び出し側に
+本来子側でできるはずの処理が記述されるためお勧めできません。
 
 === Fragmentの親子間通信
 子Fragmentから親、またFragment間でイベントを通知するにはinterfaceを使います。
@@ -173,7 +179,8 @@ class MyFragment2: Fragment{
 //}
 
 注意としては、子1→子2のように、直接の親子関係がないFragment間で参照するのは避けたほうが良いようです。
-Fragment同士の結びつきが強くなり、後々の追加・修正時に泣きを見ます。
+Fragment同士の結びつきが強くなり、後々の追加・修正時に泣きを見ます。なおFragmentからDialogFragmentを
+生成した場合などはこの限りではありません。
 
 Kotlinはスマートキャストにより、ifブロック内でいちいちキャストをしなくて済むため
 だいぶスッキリ書けますね。Kotlinはいいぞ。
@@ -270,8 +277,8 @@ class HistoryListAdapter(context: Context):
 
 いわゆるViewHolderパターンによる実装です。
 
-Kotlinではエルビス演算子@<fn>{elbis}（?:）とスコープ関数（also）により、可読性を損なうことなく
-簡潔に記述することができます。
+紙面の都合により変な場所で改行が入っていますが、Kotlinではエルビス演算子@<fn>{elbis}（?:）と
+スコープ関数（also）により、初期化処理を簡潔に記述することができます。
 
 //footnote[elbis][エルビス・プレスリーのリーゼント（ポンパドール）に見えることから、だそうです。]
 
@@ -360,45 +367,48 @@ ConstraintLayout特有の制約（Constraint）の付け方を@<list>{constraint
 ついでに何かと便利なGuidelineも生成します。
 
 //listnum[constraint][ConstraintLayoutの初期化-Kotlin]{
-//Guideline用のId。フィールドに保持。
-val leftId = View.generateViewId()
-val topId = View.generateViewId()
-val resId = View.generateViewId()
+class MyLayout: ConstraintLayout{
+    //コンストラクタは、カスタムViewと同じく３つoverride
+    //Guideline用のId。フィールドに保持。
+    val leftId = View.generateViewId()
+    val topId = View.generateViewId()
+    val resId = View.generateViewId()
 
-init{
-    //ImageViewの生成、追加
-    val image = ImageView(context).also{ it.id = resId }
-    this.addView(image)
-    
-    //ConstraintSetの生成
-    val constraintSet = ConstraintSet()
-    constraintSet.clone(this)
+    init{
+        //ImageViewの生成、追加
+        val image = ImageView(context).also{ it.id = resId }
+        this.addView(image)
+        
+        //ConstraintSetの生成
+        val constraintSet = ConstraintSet()
+        constraintSet.clone(this)
 
-    //Vertical Guidelineの生成
-    constraintSet.create(leftId, ConstraintSet.VERTICAL_GUIDELINE)
-    constraintSet.setGuidelinePercent(leftId, 0f)
+        //Vertical Guidelineの生成
+        constraintSet.create(leftId, ConstraintSet.VERTICAL_GUIDELINE)
+        constraintSet.setGuidelinePercent(leftId, 0f)
 
-    //Horizontal Guidelineの生成
-    constraintSet.create(topId, ConstraintSet.HORIZONTAL_GUIDELINE)
-    constraintSet.setGuidelinePercent(topId, 0f)
+        //Horizontal Guidelineの生成
+        constraintSet.create(topId, ConstraintSet.HORIZONTAL_GUIDELINE)
+        constraintSet.setGuidelinePercent(topId, 0f)
 
-    //Guidelineへの制約付けと親コンテナへの制約付け
-    //resIdはLayoutに配置されているViewのID
-    constraintSet.connect(resId, ConstraintSet.START,
-                          leftId, ConstraintSet.START)
-    constraintSet.connect(resId, ConstraintSet.TOP,
-                          topId, ConstraintSet.TOP)
-    constraintSet.connect(resId, ConstraintSet.END,
-                          ConstraintSet.PARENT_ID, ConstraintSet.END)
-    constraintSet.connect(resId, ConstraintSet.BOTTOM,
-                          ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM)
+        //Guidelineへの制約付けと親コンテナへの制約付け
+        //resIdはLayoutに配置されているViewのID
+        constraintSet.connect(resId, ConstraintSet.START,
+                            leftId, ConstraintSet.START)
+        constraintSet.connect(resId, ConstraintSet.TOP,
+                            topId, ConstraintSet.TOP)
+        constraintSet.connect(resId, ConstraintSet.END,
+                            ConstraintSet.PARENT_ID, ConstraintSet.END)
+        constraintSet.connect(resId, ConstraintSet.BOTTOM,
+                            ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM)
 
-    //Match Constarintの設定
-    constraintSet.constrainWidth(resId, ConstraintSet.MATCH_CONSTRAINT)
-    constraintSet.constrainHeight(resId, ConstraintSet.MATCH_CONSTRAINT)
+        //Match Constarintの設定
+        constraintSet.constrainWidth(resId, ConstraintSet.MATCH_CONSTRAINT)
+        constraintSet.constrainHeight(resId, ConstraintSet.MATCH_CONSTRAINT)
 
-    //設定の適用。
-    constraintSet.applyTo(this)
+        //設定の適用。
+        constraintSet.applyTo(this)
+    }
 }
 //}
 
@@ -406,8 +416,125 @@ constraintSetインスタンスにいったんcloneして、ごにょごにょ�
 コードで生成したImageViewのTopとLeft（START）をGuidelineに、BottomとRight（END）を親コンテナに紐づけてます。
 親コンテナのIDはConstraintSet.PARENT_IDで取得できます。
 
-== カスタムPreference
+この節を執筆中（8月上旬）、新たにMotionLayoutが発表されました。ConstraintLayoutの子クラスであり、
+ConstraintSetからモーションを設定できるようです。
+今はリリースされたばかりで解説が少ないですが、技術書典が開催される10月ごろには
+もっとQiitaとかで多くなってますかね。楽しみです。（自分で書け）
 
+== カスタムPreference
+１つのPreferenceにいろいろな機能をもたせたい！ではカスタムしましょう。
+
+作るのはEditTextPreferenceとCheckBoxPreferenceを足したような機能をもったPreferenceです（@<img>{preference}）。
+チェックボックスの切替及びダイアログを表示（title要素とsummary要素の編集）する機能を持っています@<fn>{preference_properties}。
+
+//footnote[preference_properties][正確には、titleとsummaryはSharedPreference#getStringから取得しています。]
+
+//image[preference][カスタムPreference][scale=0.75]{
+//}
+
+//listnum[preference_xml][カスタムPreference-Layout xml]{
+<android.support.constraint.ConstraintLayout
+    //...
+    android:id="@android:id/widget_frame">
+
+    <TextView
+        android:id="@android:id/title"
+        //..他要素省略
+        />
+
+    <TextView
+        android:id="@android:id/summary"
+        //..他要素省略
+        />
+
+    <CheckBox
+        android:id="@+id/checkBox"
+        //..他要素省略
+        />
+</android.support.constraint.ConstraintLayout>
+//}
+
+title要素とsummary要素になるTextViewには、idを"@android:id/title（summary）"として付与してください。
+SharedPreferences#getStringでtitle要素が取得できるようになります。
+
+またrootのidが"@android:id/widget_frame"でないと正常にInflateできないので、こちらも付与してください@<fn>{pref_reference}。
+
+//footnote[pref_reference][onCreateView参照 https://developer.android.com/reference/android/preference/Preference]
+
+コンストラクタは、カスタムViewと同様に３つoverrideします。
+
+//listnum[pref_java][カスタムPreference-Java]{
+class MyPreference extends Preference{
+//コンストラクタのoverride
+
+@Override
+    protected View onCreateView(ViewGroup parent) {
+        //Layoutのinfrate
+        super.onCreateView(parent);
+        LayoutInflater inflater = LayoutInflater.from(getContext());
+        //TextView, CheckBoxを配したレイアウトを展開する
+        return inflater.inflate(R.layout.my_preference, parent,false);
+    }
+
+@Override
+protected View onBindView(View view)
+    super.onBindeView(view);
+    //初期化処理はココ
+    view.setOnClickListener(
+        //ダイアログの表示処理
+    )
+
+    SharedPreferences prefs = getContext().getSharedPreferences(
+                                getKey(), Context.MODE_PRIVATE);
+    TextView titleView = view.findViewById(android.R.id.title);
+    titleView.setText(prefs.getString("title", "COMITIA"));
+    
+    CheckBox checkBox = view.findViewById(R.id.checkBox);
+    checkBox.setOnCheckedChangeListener( //リスナーセットしてチェック状態監視 );
+}
+//}
+
+//listnum[pref_kotlin][カスタムPreference-Kotlin]{
+class MyPreference: Preference{
+//コンストラクタのoverride
+
+    override fun onCreateView(parent: ViewGroup?): View {
+        super.onCreateView(parent)
+        val inflater = LayoutInflater.from(context)
+        return inflater.inflate(R.layout.my_preference, parent, false)
+    }
+
+    override fun onBindView(view: View?) {
+        super.onBindView(view)
+        val prefs = context.getSharedPreferences(
+                            key, Context.MODE_PRIVATE)
+        
+        view?.setOnClickListener {
+            //ダイアログの表示処理
+        }
+        
+        val titleView = view?.findViewById(android.R.id.title)
+        titleView?.text = prefs.getString("title", "COMITIA")
+
+        val checkBox = view?.findViewById(R.id.checkBox)
+        checkBox?.setOnCheckedChangeListener {
+            compoundButton: CompoundButton, b: Boolean ->
+            //チェック状態監視
+    }
+}
+//}
+
+Fragmentでは初期化処理をonCreateViewで行っていましたが、リファレンスにも書かれているとおり
+onBindViewでプロパティ設定等の処理を行っています。onCreateViewで初期化をしていると、
+項目が入れ替わったり変な挙動になるようです@<fn>{onbindview}。
+
+view.setOnClickListenerでは@<img>{preference}のダイアログ表示を仕込みます。
+なお、カスタムPreferenceの内容からは離れてしまいますので詳細は省きますが、
+ダイアログのOKボタンを押した後、onBindViewが走らない@<b>{こともある}ので、
+コールバックインターフェースを実装するなどにより確実に値更新をしてやってください。
+DialogFragmentとコールバックの実装は別途GitHubに上げておきます（あとがき参照）。
+
+//footnote[onbindview][http://ksoichiro.blogspot.com/2011/05/android-preference.html]
 
 == TabLayout
 == Toolbar
