@@ -1,9 +1,7 @@
 ={implements} 実装集
-//lead{
-本章は、JavaとKotlinにてよくあるAndroidアプリの実装を集めました。
-本章単体でも読めますが、@<chapref>{create_app}もあわせてお読みいただければ、
-より理解が深まるかと思います。
-//}
+#@# 本章は、JavaとKotlinにてよくあるAndroidアプリの実装を集めました。
+#@# 本章単体でも読めますが、@<chapref>{create_app}もあわせてお読みいただければ、
+#@# より理解が深まるかと思います。
 
 == Fragment
 staticなnewInstanceメソッドを定義して生成するのが定番ですね。
@@ -250,8 +248,8 @@ class MyAdapter extends ArrayAdapter<SampleDTO>{
 //}
 
 //listnum[adp_kotlin][カスタムAdapter-Kotlin]{
-class HistoryListAdapter(context: Context):
-      ArrayAdapter<HistoryDTO>(context, android.R.layout.simple_list_item_1) {
+class MyAdapter(context: Context):
+      ArrayAdapter<SampleDTO>(context, android.R.layout.simple_list_item_1) {
     private val inflater = LayoutInflater.from(context)
 
     override fun getView(position: Int, convertView: View?,
@@ -284,7 +282,7 @@ class HistoryListAdapter(context: Context):
 
 #@# === StickyListHeadersListView
 
-== カスタムView
+=={custom_view} カスタムView
 カスタムViewはViewを継承したクラスを作り、最低限onDrawをoverrideすればOKです。
 
 //listnum[view_java][カスタムView-Java]{
@@ -316,11 +314,22 @@ class MyView extends View{
 
 //listnum[view_kotlin][カスタムView-Kotlin]{
 class MyView: View {
-    constructor(context: Context): super(context, null) //1
-    constructor(context: Context, attrs: AttributeSet?) 
-     : super(context, attrs) //2
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int)
-     : super(context, attrs, defStyleAttr) //3
+    constructor(context: Context): this(context, null) //1
+    constructor(context: Context, attrs: AttributeSet?):
+                                   this(context, attrs, 0) //2
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int):
+                                   super(context, attrs, defStyleAttr) { //3
+        //３つめのsuperの後に初期化処理を記述する
+        //Context#obtainStyledAttributesメソッドで独自の識別子の値を取得する場合は、
+        //このブロックの中で取得する。
+        val typedArray = context.obtainStyledAttributes(attrs, R.styleable.Hoge, defStyleAttr, 0)
+        try{
+            //xmlで静的にセットされている値の取出し
+            fuga = typedArray.getDimension(R.styleable.Hoge_fuga, 0f)
+        } finally {
+            typedArray.recycle() //必ず呼ぶ。
+        }
+    }
 
     override fun onDraw(canvas: Canvas?){
         super.onDraw(canvas)
@@ -353,13 +362,25 @@ Qiitaの記事@<fn>{view_fn}によると次のとおり呼び出されるよう�
 バージョン分岐等の措置が必要になります……が、実際overrideしなくても動きますね。
 このため@<list>{view_java}にも記載はしていません。すみません。
 
+また、@JvmOverloadsアノテーションを付与すればもっと簡潔に記述できますが、
+既存のView（EditText等）を継承する場合は、必ずしもうまくいかない場合があるため注意してください@<fn>{extends_view}。
+
 Viewの定義が終わったら、Android Studioのメニューバーから Build→Rebuild Project
-をしてやることで、LayoutEditorのPallet→ProjectにカスタムViewが表示されます。
+を実行することで、LayoutEditorのPallet→ProjectにカスタムViewが表示されます。
 あとは他のViewと同じようにxmlで配置してください。
 
-見返したらイマイチ薄味な内容になってしまったので、付録に自作カラーピッカーの実装載せておきます。よしなに。
+なお、地味にネットでは見つけにくい情報ですが、Kotlinでセカンダリコンストラクタを宣言し、
+さらにobtainStyledAttributesメソッドで独自定義の識別子の値を取得する場合、
+３つめのコンストラクタの後に初期化ブロックを続けて記述することで、attrsを参照することができます。
+@<b>{attrsは、initブロックの中からは参照はできません。}
+日本語圏では明確な答えが見つからず、少し詰みました@<fn>{attrs_sof}。
 
-=== カスタムLayout（ConstraintLayoutの拡張）
+//footnote[extends_view][https://qiita.com/kwhrstr1206/items/93827190a535b11bd064]
+//footnote[attrs_sof][https://stackoverflow.com/questions/36716794/kotlin-how-to-access-the-attrs-for-a-customview]
+
+見返したらイマイチ薄味な内容になってしまったので、付録に自作カラーピッカーの実装を載せておきます。よしなに。
+
+==={custom_layout} カスタムLayout（ConstraintLayoutの拡張）
 あまり需要はないかもしれませんが、カスタムLayoutについても少し記述します。
 といっても、筆者はFrameLayoutとConstraintLayoutを拡張したカスタムLayoutしか作ったことがないので、
 参考程度にお読みください。
@@ -370,13 +391,14 @@ ConstraintLayout特有の制約（Constraint）の付け方を@<list>{constraint
 
 //listnum[constraint][ConstraintLayoutの初期化-Kotlin]{
 class MyLayout: ConstraintLayout{
-    //コンストラクタは、カスタムViewと同じく３つoverride
     //Guideline用のId。フィールドに保持。
     val leftId = View.generateViewId()
     val topId = View.generateViewId()
     val resId = View.generateViewId()
+    private latevar fuga: Float
 
-    init{
+    //コンストラクタは、カスタムViewと同じく３つoverride
+    constructor~~~: super(~~~){
         //ImageViewの生成、追加
         val image = ImageView(context).also{ it.id = resId }
         this.addView(image)
@@ -414,11 +436,11 @@ class MyLayout: ConstraintLayout{
 }
 //}
 
-constraintSetインスタンスにいったんcloneして、ごにょごにょ制約を付けた後、applyToで適用するという流れです。
-コードで生成したImageViewのTopとLeft（START）をGuidelineに、BottomとRight（END）を親コンテナに紐づけてます。
+constraintSetにcloneして、制約を付けた（connect）後、applyToで適用します。
+@<list>{constraint}では、コードで生成したImageViewのTopとLeft（START）をGuidelineに、BottomとRight（END）を親コンテナに紐づけてます。
 親コンテナのIDはConstraintSet.PARENT_IDで取得できます。
 
-この節を執筆中（8月上旬）、新たにMotionLayoutが発表されました。ConstraintLayoutの子クラスであり、
+ところでこの節を執筆中（8月上旬）、新たにMotionLayoutが発表されました。ConstraintLayoutの子クラスであり、
 ConstraintSetからモーションを設定できるようです。
 今はリリースされたばかりで解説が少ないですが、技術書典が開催される10月ごろには
 もっとQiitaとかで多くなってますかね。楽しみです。（自分で書け）
@@ -457,7 +479,7 @@ ConstraintSetからモーションを設定できるようです。
 //}
 
 title要素とsummary要素になるTextViewには、idを"@android:id/title（summary）"として付与してください。
-SharedPreferences#getStringでtitle要素が取得できるようになります。
+SharedPreferences#getStringでtitle要素等が取得できるようになります。
 
 またrootのidが"@android:id/widget_frame"でないと正常にInflateできないので、こちらも付与してください@<fn>{pref_reference}。
 
@@ -471,9 +493,9 @@ class MyPreference extends Preference{
 
 @Override
     protected View onCreateView(ViewGroup parent) {
-        //Layoutのinfrate
         super.onCreateView(parent);
-        LayoutInflater inflater = LayoutInflater.from(getContext());
+        LayoutInflater inflater = LayoutInflater.from(getContext()); 
+        
         //TextView × 2, CheckBoxを配したレイアウトを展開する
         return inflater.inflate(R.layout.my_preference, parent,false);
     }
@@ -549,9 +571,9 @@ AsyncTaskクラスは、非同期処理を実現する方法の中でもかな�
 AsyncTaskクラスを継承して書くなら@<list>{task_in_other}、匿名クラスで書くなら@<list>{task_in_noname}のようになるでしょうか。
 
 //listnum[task_in_other][継承してSampleTaskを定義-Kotlin]{
-open class SampleTask: AsyncTask<Void, Void, Int>() {
+open class SampleTask: AsyncTask<Int, Float, String>() {
     //SampleTaskクラスではworkerスレッドでの処理に集中。
-    override fun doInBackground(vararg params: Void?): Int {
+    override fun doInBackground(vararg params: Int?): String {
         //workerスレッドでの処理
         return 0
     }
@@ -559,9 +581,9 @@ open class SampleTask: AsyncTask<Void, Void, Int>() {
 
 class SampleClass{
     //UI側の処理に集中するため、onPostExecuteのみoverride。
-    //TestTaskをopenにしないとoverrideできないので注意。
+    //SampleTaskをopenにしないとoverrideできないので注意。
     fun taskRun(){
-        val task = object : TestTask(){
+        val task = object : SampleTask(){
             override fun onPostExecute(result: Int?) {
                 super.onPostExecute(result)
             }
@@ -573,25 +595,25 @@ class SampleClass{
 //listnum[task_in_noname][匿名クラスでの定義-Kotlin]{
 class SampleClass{
     fun taskRun(){
-        val task = object : AsyncTask<Int, Int, Int>() {
+        val task = object : AsyncTask<Int, Float, String>() {
             override fun onPreExecute() {
                 super.onPreExecute()
                 //UIの操作が可能。処理中のDialogFragmentを表示したり。
             }
             
             //doInBackgroudだけoverride必須
-            override fun doInBackground(vararg params: Int?): Int {
+            override fun doInBackground(vararg params: Int?): String {
                 //workerスレッドで行う処理。UIは操作不可！
                 publishProgress() //onProgressUpdateのコール
                 return 0
             }
 
-            override fun onProgressUpdate(vararg values: Int?) {
+            override fun onProgressUpdate(vararg values: Float?) {
                 super.onProgressUpdate(*values)
                 //ここもUIの操作が可能
             }
 
-            override fun onPostExecute(result: Int?) {
+            override fun onPostExecute(result: String?) {
                 super.onPostExecute(result)
                 //UIに結果を反映したりいろいろ
             }
@@ -605,9 +627,10 @@ class SampleClass{
 使い勝手いい気がします。ただしStrategyパターンとかでworkerスレッドの処理をごそっと入れ替える場合は、
 クラスを別に作るほかありませんね。
 
-Kotlinで複数のメソッドをoverrideする場合は、object : AsyncTask<~>のように書く必要があります（オブジェクト式@<fn>{kotlin_object}）。
+Kotlinで複数のメソッドをoverrideする場合は、object : AsyncTask<~>のように書く必要があります@<fn>{kotlin_object}。
 また@<list>{task_in_other}のように別クラスで記述する場合は、openを付けて継承可能にしないとoverrideできません。
+Kotlinは、classのみだとfinalクラスとして扱われてしまうためです。
 
-//footnote[kotlin_object][https://dogwood008.github.io/kotlin-web-site-ja/docs/reference/object-declarations.html]
+//footnote[kotlin_object][オブジェクト式 https://dogwood008.github.io/kotlin-web-site-ja/docs/reference/object-declarations.html]
 
 

@@ -1,2 +1,2 @@
-={appendix_c} declare-stylableについて
+={appendix_c} declare-stylableとか
 
