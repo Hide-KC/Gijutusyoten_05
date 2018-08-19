@@ -10,7 +10,9 @@
  * 最新のタイムラインを取得する（非同期的）
  * アプリからツイートする
  * アプリからふぁぼ＆RTを飛ばす
- * フォロー/フォロワーアカウントの一覧を取得する
+
+Activityはタイムライン（以下、TL）表示用、PreferenceFragment用の２枚で構成します。
+リプライ機能は今回は実装しません。
 
 == Twitter4Jの利用
 今回は、Twitterとの連携が非常に簡単になる神ライブラリ「Twitter4J@<fn>{twitter4j_url}」を利用します。
@@ -65,10 +67,10 @@ Twitter Application Managementを開くと、次のような画面が表示さ�
 //image[app_management_top][Twitter Application Managementトップ]{
 //}
 
-（なんやかんや押してアプリを登録します。）
+TODO: （なんやかんや押してアプリを登録します。）
 
 登録したアプリをクリックし、「Keys and Access Tokens」タブをクリックし、Consumer KeyとConsumer Secretを確認します。
-これらの文字列はあとで使用するので、場所だけ覚えておいてください。
+これらの文字列は後ほど使用します。
 
 == プロジェクトを作る
 次にAndroid Studioを起動し、プロジェクトを作ります。
@@ -79,18 +81,86 @@ Twitter Application Managementを開くと、次のような画面が表示さ�
 //image[create_project_02][プロジェクトの作成2]{
 //}
 
-
+Kotlinを使用するので、「Include Kotlin Support」にチェックを入れます。
+ActivityはとりあえずEmpty Activityから作っていきます。
 
 == ライブラリをインポートする
+無事にプロジェクトが作れたら、次にGradleを開きライブラリをインポートします。
 
+//listnum[gradle_code][ライブラリの依存関係の追加]{
+dependencies {
+    //...
+    implementation 'com.android.support:design:27.+'
+    implementation 'org.twitter4j:twitter4j-core:4.0.+'
+    implementation 'com.github.bumptech.glide:glide:4.7.1'
+    implementation 'com.android.support:design:27.+'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.7.1'
+}
+//}
 
-=== Twitter4J
-=== Glide
-=== Android Support Library
+執筆時点のTwitter4Jの最新バージョンは4.0.4でしたが、4.0.+として微修正等に追従するようにしています。
+また、GlideはURLをセットするといい感じに画像をキャッシュしてくれるライブラリで、
+アカウントアイコンの表示用にインポートしています。
+FIXME: デザインサポートライブラリも追加しています。
+
+//footnote[glide_git][https://ほにゃらら]
+
+#@# === Android Support Library
+
 == レイアウトファイルを作る
+アプリのレイアウトファイルを作っていきます。
+
 === MainActivity
-=== Fragment、DialogFragment
-=== タイムライン用ListViewのレイアウト
+MainActivityのイメージは次のとおりです。
+
+//image[main_image][MainActivityレイアウト]{
+//}
+
+//listnum[main_code][MainActivityレイアウト.xml]{
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout ...
+    <FrameLayout
+        android:id="@+id/timeline"
+        ... />
+
+    <FloatingActionButton
+        android:id="@+id/show_dialog"
+        ... />
+</android.support.constraint.ConstraintLayout>
+//}
+
+FrameLayoutはTL用、FloatingActionButtonはツイートダイアログ呼び出し用に配置しています。
+
+=== Preference用のActivity
+PreferenceFragmentを表示するためのActivity
+
+
+=== DialogFragment
+次の動作にDialogFragmentを表示してサポートします。
+ 
+ * ツイート送信
+ * リツイート確認
+
+//listnum[tweet_dialog][ツイート用DialogFragment.xml]{
+
+//}
+
+//listnum[rt_dialog][RT確認用DialogFragment.xml]{
+
+//}
+
+=== TL用ツイートのレイアウト
+TLのツイートには次の要素を表示します。
+
+ * アイコン
+ * 名前
+ * ツイート時間
+ * ツイート
+ * RTアイコン
+ * ふぁぼアイコン
+
+
+
 == 文字列リソースを用意する
 === strings.xml
 === oauth_key.xml
