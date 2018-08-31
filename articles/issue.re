@@ -23,23 +23,25 @@
  - 本書の環境
 - 実装集の章_implements
  - 実装ババーっと
-  - Fragment
-   - newInstanceパターンで解説
-   - 親子間イベント通知
-  - Callback
+  #@# - Fragment
+  #@#  - newInstanceパターンで解説
+  #@#  - 親子間イベント通知
+  #@# - Callback
   - ConstraintLayout
    - コードからの実装をメインに据える
   - カスタムアダプター（ViewHolderパターン）
   - カスタムビュー、カスタムレイアウト、カスタムプリファレンス
-  - DBHelperクラス
-  - TabLayout
-  - Toolbar
-  - DrawerLayout
+  #@# - DBHelperクラス
+  #@# - TabLayout
+  #@# - Toolbar
+  #@# - DrawerLayout
   - AsyncTask拡張
 - Twitterアプリ製作の章_create_app
+ - 何を作るか？…CircleFinderのサークル抽出アルゴ部分を実装した軽量アプリ
+  - 「技術書典５」で参加者を抽出する。
  - twitter4jの利用
- - アプリケーションの登録
- - フロー説明
+#@#  - アプリケーションの登録
+#@#  - フロー説明
  - 
 - まとめ_conclusion
 
