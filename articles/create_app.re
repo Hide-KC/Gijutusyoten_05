@@ -107,7 +107,7 @@ Application Managementのトップに戻ると、@<img>{registered_top}のよう
 //}
 
 アプリをクリックし、Keys and Access TokensタブをクリックするとConsumerKeyとConsumerSecretが表示されています。
-あとからでも確認できるので、場所だけ覚えておきましょう。
+あとからでも確認できるので、場所だけ覚えておけば大丈夫です。
 
 //image[circlefinder][Keyの取得][scale=0.75]{
 //}
@@ -121,12 +121,12 @@ Application Managementのトップに戻ると、@<img>{registered_top}のよう
 //}
 
 Kotlinを使用するので、「Include Kotlin Support」にチェックを入れます。
-ActivityはEmptyActivityから作っていきましょう。
+ActivityはEmptyActivityから作っていきます。
 
 == ライブラリをインポートする
 無事にプロジェクトが作れたら、次にGradleを開きライブラリをインポートします。
 
-//listnum[gradle_code][ライブラリの依存関係の追加 app.gradle]{
+//listnum[gradle_code][app.gradle]{
 repositories {
     jcentor()
 }
@@ -138,12 +138,11 @@ kotlin {
 }
 
 dependencies {
-    /..
+    ...
     implementation 'com.android.support:design:27.+'
     implementation 'org.twitter4j:twitter4j-core:4.0.+'
     implementation 'com.github.bumptech.glide:glide:4.7.1'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.7.1'
-
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.24.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:0.24.0'
 }
@@ -159,32 +158,38 @@ Twitterサーバとの非同期処理はAsyncTaskでもAsyncTaskLoaderでもい�
 //footnote[twitter4j_git][https://github.com/yusuke/Twitter4J]
 //footnote[glide_hp][https://github.com/bumptech/glide]
 
+== Permissionを追加する
+本アプリではネット通信により各種データを取得するため、AndroidManifest.xmlにパーミッションを追加します。
+うっかり忘れないうちにやっておきます！@<fn>{wasureteta}
+
+//list[permission][AndroidManifest.xml]{
+<uses-permission android:name="android.permission.INTERNET"/>
+//}
+
+//footnote[wasureteta][忘れていたので後からこの節差し込みました]
+
 == レイアウトファイルを作る
-=== MainActivity
+=== MainActivityのレイアウト
 MainActivityのイメージは@<img>{activity_main}のとおりです。
 
 //image[activity_main][MainActivityレイアウト][scale=0.5]{
 //}
 
-//listnum[main_xml][MainActivityレイアウト.xml]{
+//listnum[main_xml][activity_main.xml]{
 <android.support.constraint.ConstraintLayout
     ...>
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
-        ...>
+    <android.support.v7.widget.Toolbar android:id="@+id/toolbar"
+        ... >
     </android.support.v7.widget.Toolbar>
-
-    <FrameLayout
-        android:id="@+id/participant_frame"
-        ...>
+    <FrameLayout android:id="@+id/participant_frame"
+        ... >
     </FrameLayout>
 </android.support.constraint.ConstraintLayout>
 //}
 
 //listnum[menu_xml][menu_main.xml]{
 <menu ...>
-    <item
-        android:id="@+id/update_follows"
+    <item android:id="@+id/update_follows"
         app:showAsAction="always"
         ... />
 </menu>
@@ -193,17 +198,15 @@ MainActivityのイメージは@<img>{activity_main}のとおりです。
 FrameLayoutは参加者一覧を表示するParticipantsFragment用に配置しています（@<list>{main_xml}）。
 Toolbarにはフォローを取得するためのアップデートボタンを配置します（@<list>{menu_xml}）。
 
-=== 参加者一覧用のFragment
+=== 参加者一覧用Fragmentのレイアウト
 参加者一覧はListViewを使って表示します。
-単純にFrameLayoutにListViewをmatch parentで配置してるだけなので、
-レイアウトファイル作らなくてもたぶん大丈夫だと思います。
+単純にFrameLayoutにListViewをmatch_parentで配置してるだけなので、
+コード上で生成しても大丈夫だと思います。
 
-//listnum[fragment_participants][参加者一覧用Fragment.xml]{
+//listnum[fragment_participants][fragment_participants.xml]{
 <FrameLayout ...>
-    <ListView
-        android:id="@+id/participant_list"
-        ...>
-    </ListView>
+    <ListView android:id="@+id/participant_list"
+        ... />
 </FrameLayout>
 //}
 
@@ -218,53 +221,37 @@ ListViewの項目は、カスタムアダプターを使って@<img>{adapter_ima
 //image[adapter_image][表示する情報][scale=0.75]{
 //}
 
-//listnum[custom_adapter_xml][表示するフォローアカウントの情報]{
+//listnum[custom_adapter_xml][adapter_item.xml]{
 <android.support.constraint.ConstraintLayout ...
     android:layout_height="wrap_content">
-
-    <ImageView
-        android:id="@+id/profile_icon"
+    <ImageView android:id="@+id/profile_icon"
         ... />
-
-    <TextView
-        android:id="@+id/user_name"
+    <TextView android:id="@+id/user_name"
         ... />
-
-    <TextView
-        android:id="@+id/screen_name"
+    <TextView android:id="@+id/screen_name"
         ... />
-
-    <TextView
-        android:id="@+id/circle_space"
+    <TextView android:id="@+id/circle_space"
         ... />
-
 </android.support.constraint.ConstraintLayout>
 //}
 
-=== DialogFragment
+=== DialogFragmentのレイアウト
 参加者取得中はダイアログを表示して待機させたいので、
 待機用のDialogFragmentを作成します。
 また待機中に何もレスポンスが無いといつ取得が終わるか分からないので、
 最低限取得したフォローアカウントの数（counter）を表示するようにしています。
 
-//listnum[fragment_dialog][待機用Dialog.xml]{
+//listnum[fragment_dialog][fragment_dialog.xml]{
 <android.support.constraint.ConstraintLayout ...>
-    <TextView
-        android:id="@+id/counter"
+    <TextView android:id="@+id/counter"
         .../>
 </android.support.constraint.ConstraintLayout>
 //}
 
 == 文字列リソースを用意する
-strings.xmlに@<list>{strings}のとおり追加します。
+strings.xmlに@<list>{strings}を追加します。
 
 //listnum[strings][追加する文字列リソース]{
-    .../
-    <string name="update">更新</string>
-    <string name="accesstoken_success">認証成功</string>
-    <string name="accesstoken_error">認証失敗</string>
-    <string name="profile_url">"twitter://user?screen_name="</string>
-
     <string name="consumer_key">ここにConsumer Keyを入力</string>
     <string name="consumer_secret">ここにConsumer Secretを入力</string>
     <string name="callback_url">ここにCallbackURLを入力</string>
@@ -274,7 +261,7 @@ Consumer KeyとConsumer Secretは本来ユーザから見えないように組�
 今回はサンプルアプリなので平文で記述してしまいます。
 
 == 実装
-ここまでで必要なレイアウトの生成が終わったので、やっと実装に入っていけます。書き下すと長かった。
+ここまでで必要なレイアウトの定義が終わったので、やっと実装に入っていけます。
 実装は次の順番で行います。
 
  1. OAuth認証関係クラス（TwitterUtils, ConfirmOAuthActivity, TwitterOAuth）
@@ -283,7 +270,7 @@ Consumer KeyとConsumer Secretは本来ユーザから見えないように組�
  6. タスク進捗確認ダイアログ（ProgressDialogFragment）
  7. MainActivity
 
-コード全容はGitHubに置いておきますので、ポイントを絞って解説していきます。
+コード全容はGitHubにありますので、ポイントを絞って解説していきます。
 
 === OAuth認証関係クラス
 Twitterを自作アプリから操作する場合、操作するアカウント固有のAccessTokenを取得しなければなりません。
@@ -295,60 +282,41 @@ AccessTokenが流出すると第三者からアカウントの乗っ取りが可
 //listnum[twitterutils][TwitterUtils.kt]{
 //object宣言することでSingletonなクラスが作れる。すごーい！
 object TwitterUtils {
-    private enum class KeyEnum{
-        TOKEN, TOKEN_SECRET
-    }
+    private enum class KeyEnum{ TOKEN, TOKEN_SECRET }
 
     fun getTwitter(context: Context): Twitter {
         //Twitterオブジェクトの生成
         val twitter = TwitterFactory.getSingleton()
-
         //ConsumerKeyとConsumerSecretを入力
         twitter.setOAuthConsumer(context.getString(R.string.consumer_key), 
                                  context.getString(R.string.consumer_secret))
-
         //AccessTokenを生成
         val accessToken = loadAccessToken(context)
         if (accessToken != null){
             twitter.oAuthAccessToken = accessToken
-        } else {
-            Log.d(javaClass.simpleName, "AccessToken is not seved")
         }
-
-        //AccessTokenをセットしたTwitterオブジェクトを返す
         return twitter
     }
 
-    fun storeMyAccount(context: Context, accessToken: AccessToken){
+    fun storeAccessToken(context: Context, accessToken: AccessToken){
         //AccessTokenの保持
-        storeAccessToken(context, accessToken.token, accessToken.tokenSecret)
+        store(context, accessToken.token, accessToken.tokenSecret)
     }
 
     fun loadAccessToken(context: Context): AccessToken?{
         //DefaultSharedPreferencesからAccessTokenを取得
-        ...
-        return if (token != null && tokenSecret != null){
-            AccessToken(token, tokenSecret)
-        } else {
-            null
-        }
     }
-
-    fun deleteAccessToken(context: Context){
-        storeAccessToken(context, null, null)
-    }
-
-    private fun storeAccessToken(context: Context, token: String?,
+    
+    private fun store(context: Context, token: String?,
                                              tokenSecret: String?){
         //DefaultSharedPreferencesに保持
-        ...
     }
 }
 //}
 
 TwitterUtils.getTwitterでは、ConsumerKey、ConsumerSecret、
 （保存されていれば）AccessToken及びAccessTokenSecretを詰めた状態のTwitterオブジェクトを返します。
-ツイートの取得・送信等のTwitterの操作は、すべてここで生成したTwitterオブジェクトにより行います。
+ツイートの取得・送信等のTwitterの操作は、すべてTwitterUtils.getTwitterで生成したTwitterオブジェクトにより行います。
 
 次に、OAuth認証をするためのConfirmOAuthActivity及びTwitterOAuthクラスを作成します。
 ConfirmOAuthActivityは、OAuth認証により起動したWebブラウザからのコールバックを受け取るだけのActivityであり、
@@ -357,48 +325,40 @@ MainActivity内で実装することも不可能ではありませんが、認�
 
 //listnum[oauth_activity][ConfirmOAuthActivity.kt]{
 class ConfirmOAuthActivity : AppCompatActivity() {
-    private val oauth: TwitterOAuth = TwitterOAuth(this) 
-    companion object {
-        val REQUEST_CODE = 1000 //Javaでいうpublic static finalな変数
-    }
+    private val oauth = TwitterOAuth(this)
+    companion object { val REQUEST_CODE = 1000 }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_confirm_oauth)
-
+        ...
         //即承認画面（Webページ）に飛ばす。
-        //実際は確認ボタンやダイアログ表示など。
         oauth.startAuthorize()
     }
 
     //Webページでアプリを承認するとここに戻ってくる
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        oauth.oAuthApproval(this, intent)
+        oauth.oAuthApproval(intent)
         setResult(Activity.RESULT_OK, intent)
         finish()
     }
 
-    //戻るボタンでActivityを閉じた場合はRESULT_CANCELE
+    //戻るボタンでActivityを閉じた場合はRESULT_CANCELED
     override fun onBackPressed() {
         super.onBackPressed()
-        val intent = Intent()
-        intent.putExtra("msg", "finish")
+        val intent = Intent().also { it.putExtra("msg", "finish") }
+        //RESULT_CANCELEDセットしてfinish
         setResult(Activity.RESULT_CANCELED, intent)
         finish()
     }
 }
 //}
 
-実際のOAuth認証を処理するTwitterOAuthクラスを、@<list>{oauth_core}に示します。
-やっとこさCoroutinesを使う場面が出てきました。
+@<list>{oauth_core}はOAuth認証を処理するTwitterOAuthクラスです。
+やっとCoroutinesを使う場面が出てきました。
 
 //listnum[oauth_core][TwitterOAuth.kt]{
 class TwitterOAuth(private val context: Context) {
-    private val twitter: Twitter = TwitterUtils.getTwitter(context)
-    private val callbackUrl = context.getString(R.string.callback_url)
-    private lateinit var requestToken: RequestToken
-
+    ...
     //認証開始。Coroutinesで処理してみる。
     fun startAuthorize(){
         launch(UI) {
@@ -406,53 +366,41 @@ class TwitterOAuth(private val context: Context) {
                 try {
                     requestToken = twitter.getOAuthRequestToken(callbackUrl)
                     return@async requestToken.authenticationURL
-                } catch (e: IllegalStateException) {
-                    e.printStackTrace()
-                } catch (e: TwitterException) {
-                    e.printStackTrace()
-                }
+                } ...
                 return@async null
             }.await()
 
             if (requestToken != null){
-                //Webブラウザを起動
+                //Webブラウザを起動して認証ページを表示
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(requestToken))
                 context.startActivity(intent)
             } else {
-                Log.d(javaClass.simpleName, "Authorize失敗")
+                Log.d(javaClass.simpleName, "RequestToken取得失敗")
             }
         }
     }
 
     //ConfirmOAuthActivity#onNewIntentからコールされる
-    fun oAuthApproval(context: Context, intent: Intent?){
-        if (intent == null || intent.data == null ||
-            !intent.data.toString().startsWith(callbackUrl)){
-            //callbackUrlでない場合はreturn。startsWith使わなくてもいい気がする。
-            return
-        }
-
+    fun oAuthApproval(intent: Intent?){
+        ...
         launch(UI) {
             //Deferred<AccessToken?>が返る
             val deferred = async {
                 try {
-                    //RequestTokenにはoauth_verifierというパラメータが含まれている。
+                    //RequestTokenはoauth_verifierというパラメータを所持。
                     //AccessTokenを取得するにあたってこのパラメータを与えてやる。
                     return@async twitter.getOAuthAccessToken
                                             (requestToken, "oauth_verifier")
-                } catch (e: TwitterException) {
-                    e.printStackTrace()
-                }
+                } ...
                 return@async null
             }
 
             val accessToken = deferred.await() //ここで待機
-            if (accessToken.await() != null) {
+            if (accessToken != null) {
                 //認証成功。AccessTokenを保存して終了。
-                TwitterUtils.storeMyAccount(context, accessToken)
-                Log.d("Comiketter", "認証成功！")
+                TwitterUtils.storeAccessToken(context, accessToken)
             } else {
-                Log.d("Comiketter", "認証失敗。")
+                Log.d(javaClass.simpleName, "認証失敗")
             }
         }
     }
@@ -462,10 +410,10 @@ class TwitterOAuth(private val context: Context) {
 oAuthApprovalでは、あえてasync関数とawait関数を離してみました。
 AccessTokenが正常に返ってくればOAuth認証完了です！
 
-=== 参加者一覧抽出クラス
+==={extract_participants} 参加者一覧抽出クラス
 ここで、このアプリの要件は「フォロー一覧から技術書典の参加者を抽出して表示する」ことだったので、
-まずは「フォロー一覧」を取得します。
-取得はTwitter#getFriendsIDsメソッド及びlookupUsersメソッドを組み合わせて行います。
+まず「フォロー一覧」を取得し、次に「参加者を抽出」という手順で実装します。
+フォロー一覧はgetFriendsIDsメソッド及びlookupUsersメソッドを組み合わせて行います。
 
  * getFriendsIDs：１回の呼び出しで最大5000件のユーザIDを取得。RateLimit=15
  * lookupUsers：１回の呼び出しで最大100件のUserオブジェクトを取得。RateLimit=900
@@ -474,29 +422,28 @@ getFriendsIDsが15分間で15回まで呼び出せるので最大7.5万アカウ
 900回までなので最大9万アカウントまで対応できます。
 
 //listnum[tasks][TwitterTask.kt]{
-class TwitterTask(private val context:Context,
-                    private val rootJob: Job?) {
+class TwitterTask(private val context:Context) {
+    //DialogFragmentに値を通知するためのインターフェース
     interface UpdateListener{
-        fun update(count: Int) //DialogFragmentに値を通知する用
+        fun update(count: Int)
     }
 
-    fun cancel(){
-        //ダイアログからのキャンセル受信用
+    private var rootJob: Job? = null
+    fun setRootJob(){ rootJob = Job() }
+
+    fun cancelAll(){
         rootJob?.cancel()
         rootJob = null
     }
 
-    fun getFollow(): List<User>{
-        val follows = mutableListOf<User>()
-        val twitter = TwitterUtils.getTwitter(context)
-        var ids: IDs
+    fun getParticipants(): List<User>{
         val idsList = mutableListOf<Long>()
         var cursor: Long = -1L //ページング処理
 
         launch(UI, parent = rootJob) {
             try {
-                do {
-                    //自身のIDを引数として渡す
+                var ids: IDs
+                do { //自身のIDを引数として渡す
                     ids = async{ twitter.getFriendsIDs(twitter.id, cursor) }
                                 .await()
                     for (id: Long in ids.iDs){
@@ -505,44 +452,261 @@ class TwitterTask(private val context:Context,
                     //次のページ
                     cursor = ids.nextCursor
                 } while (ids.hasNext())
-
-                if (idsList.size <= 0){
-                    //取得IDsが0個だった場合return
-                    return@launch
-                }
-
-                //IDリストをぶん回しUserオブジェクトを取得
                 ...
+            } ...
+        }
+        return extractParticipants(idsList)
+    }
+
+    //IDリストからUserオブジェクトを取得し、参加者を抽出
+    private fun extractParticipants(idsList: List<Long>): List<User>{
+        val participants = mutableListOf<User>()
+        ...
+        launch(UI, parent = rootJob) {
+            try {
+                //IDリストをぶん回しUserオブジェクトを取得
                 for (user_i: Int in 0 until max){
-                    ...
                     val userResponseList = async {
-                        twitter.lookupUsers(*mlist.toLongArray())
+                            twitter.lookupUsers(*mlist.toLongArray())
                         }.await()
                     for (user in userResponseList){
+                        //サークルスペースを持つユーザのみ抽出
                         if (StringMatcher.getCircleSpace(user.name) != ""){
-                            follows.add(user)
+                            participants.add(user)
                         }
                     }
 
                     if (context is UpdateListener){
                         //MainActivityに経過を通知
-                        context.update(follows.size)
+                        context.update(participants.size)
                     }
                 }
-            } catch (e: CancellationException){
-                //cancel
-                follows.clear()
-                return@launch
-            } catch (e: TwitterException){
-                e.printStackTrace()
-            }
+            } ...
         }
-        return follows
+        return participants
     }
 }
 //}
 
+キャンセル処理はrootJob.cancelの一括キャンセルのみ対応していますが、
+たとえばMap<Key, Job>を作って個別に管理することも可能です。
+TwitterTask内で処理を行っていますが、呼び出し側でsetRootJobを忘れると
+一括キャンセルが効かないので、そこだけ注意が必要ですね。
+基本的にはActivityのライフサイクルに合わせてonResume/onPauseで
+setRootJob及びcancelAllを呼べば大丈夫です。
+
+サークルスペースは正規表現を使用してマッチングしています（@<list>{string_matcher}）。
+
+//listnum[string_matcher][StringMatcher.kt]{
+object StringMatcher {
+    private val EVENT_PATTERN = "書[典展]"
+    private val SPACE_PATTERN =
+             ".*([a-zA-Zａ-ｚＡ-Ｚあ-んア-ン]).?([0-9０-９][0-9０-９])"
+    
+    fun getCircleSpace(name: String): String{
+        //EVENT_PATTERNがマッチすれば、次にサークルスペースを抽出
+        if (!hasEventPattern(name)) return ""
+        val pattern = Pattern.compile(SPACE_PATTERN)
+        val matcher = pattern.matcher(name)
+        ...
+    }
+
+    private fun hasEventPattern(name: String): Boolean{
+        val pattern = Pattern.compile(EVENT_PATTERN)
+        val matcher = pattern.matcher(name)
+        return matcher.find()
+    }
+}
+//}
+
+多くの即売会系イベントではサークルスペースのパターンがほぼ同じなので、
+イベント名とスペース名で分けることで他イベントの場合でも適用しやすいようにしてみました。
+a/b/abの区分けを付ける場合はもうひと工夫必要ですが、技術書典では無かったため省略しています。
+
 === 参加者一覧表示フラグメント
+@<hd>{extract_participants}にて参加者を抽出できたので、
+次はリストビューに一覧を表示します。
+表示する項目は@<img>{adapter_image}のとおりです。
+
+//listnum[participants_adapter][ParticipantsAdapter.kt]{
+class ParticipantsAdapter(context: Context):
+         ArrayAdapter<User>(context, android.R.layout.simple_list_item_1) {
+    private val inflater = LayoutInflater.from(context)
+
+    override fun getView(position: Int, convertView: View?,
+                                         parent: ViewGroup?): View {
+        val cv = convertView?:
+                    inflater.inflate(R.layout.adapter_item, null).also {
+            it.tag = ItemViewHolder(it)
+        }
+
+        val holder = cv.tag as ItemViewHolder
+        val item = getItem(position)
+        holder.name.text = item.name
+        holder.screenName.text = item.screenName
+        holder.circleSpace.text = StringMatcher.getCircleSpace(item.name)
+        holder.icon.setOnClickListener{
+            //プロフィールページを公式アプリで起動するなど。
+            val profileUrl = "twitter://user?screen_name=" + item.screenName
+            ...
+        }
+        Glide.with(context).load(item.profileImageURL).into(holder.icon)
+        return cv
+    }
+
+    private class ItemViewHolder(view: View){ ... }
+}
+//}
+
+ViewHolderパターンにて、各ViewにUserの情報を詰めています。
+次にこのリストビューを保持するFragmentを作成します。
+
+//listnum[participant_fragment][ParticipantsFragment.kt]{
+class ParticipantsFragment: Fragment() {
+    private lateinit var participants: ListView
+    ...
+    fun setAdapter(users: List<User>){
+        if (context != null){
+            val adapter = if (participants.adapter != null){
+                (participants.adapter as ParticipantsAdapter)
+                                            .also { it.clear() }
+            } else {
+                ParticipantsAdapter(context!!)
+            }
+
+            for (user in users){
+                adapter.add(user)
+            }
+            participants.adapter = adapter
+        }
+    }
+
+    companion object{ ... }
+}
+//}
+
+Adapterの生成にcontext!!を使うのはちょっと臭う気もしますが、
+しかして代替案も見つけられなかったのでこれで行ってみます。
+またKotlinはif文は式なので、変数に代入するような形で記述できるのはとても便利です。
+
+これでリストビューに参加者一覧が表示されるようになりました！
 
 === タスク進捗確認ダイアログ
+ダイアログはキャンセル動作を確実に行うため、ICancelインターフェースを定義します。
+MainActivityにICancelを実装しますが、DialogFragmentとのヒモづけは
+onAttachをoverrideしてフィールドに参照をもつようにしています。
+
+//listnum[dialog][ProgressDialogFragment.kt]{
+class ProgressDialogFragment: DialogFragment() {
+    interface ICancel{
+        fun cancel()
+    }
+    private var cancellable: ICancel? = null
+    ...
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+        if (context is ICancel){
+            cancellable = context
+        }
+    }
+
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        ...
+        val builder = AlertDialog.Builder(context)
+        builder.setView(view).setTitle(title)
+                .setNegativeButton("cancel") {
+                 dialogInterface: DialogInterface, i: Int ->
+                    cancellable?.cancel() //MainActivityへのコールバック
+                    dialogInterface.dismiss()
+                }
+        return builder.create()
+    }
+
+    fun setCount(count: Int) { ... }
+    ...
+}
+//}
+
+キャンセル処理は今回インターフェースを定義して行っていますが、
+onAttachでコールバック先を保持し、cancelメソッドを呼び出す方が
+個人的には安心のような気がします。
+ここはいろいろとやりようがあると思いますので、お好きな方法で実装してみてください。
+
+ただし、無いとは思いますが、コールバック先をas演算子とかでキャストして
+クラス固有のメソッドをコールするような真似はいけません…それはいけない……。@<fn>{ikenai}
+
+//footnote[ikenai][オブジェクト指向もカプセル化もよく知らないまま作ってた頃はよくやってました（遠い目）]
+
+=== MainActivityの実装
+やっと最後のMainActivityの実装です。
+@<list>{main}にコードを示しますが、ライフサイクルに合わせてタスク関係の処理をoverrideしたら
+けっこう長くなってしまいました。中身はそこまで凝ったことはしておりません。
+
+//listnum[main][MainActivity.kt]{
+class MainActivity : AppCompatActivity(),
+                     ProgressDialogFragment.ICancel,
+                     TwitterTask.UpdateListener {
+    private enum class FragmentTag{ PARTICIPANTS, PROGRESS }
+
+    override fun update(count: Int) {
+        ...
+        progressDialogFragment.setCount(count)
+    }
+
+    override fun onActivityResult(...) {
+        ...
+        if (requestCode == ConfirmOAuthActivity.REQUEST_CODE
+            && resultCode == Activity.RESULT_CANCELED){
+            //CANCELだった場合、アプリ終了
+            finish()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        task?.setRootJob()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        task?.cancelAll()
+    }
+
+    override fun cancel(){
+        task?.cancelAll()
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        ...
+        if (TwitterUtils.loadAccessToken(this) == null){
+            //AccessTokenが保存されていなかったら、すぐ認証処理開始
+            val intent = Intent(this, ConfirmOAuthActivity::class.java)
+            startActivityForResult(intent, ConfirmOAuthActivity.REQUEST_CODE)
+        }
+
+        toolbar.inflateMenu(R.menu.menu_main)
+        toolbar.setOnMenuItemClickListener {
+            val id = it.itemId
+            if (id == R.id.update_follows){
+                if (task == null) { task = TwitterTask(this) }
+
+                //キャンセル付きダイアログ表示
+                val dialog = ProgressDialogFragment.newInstance()
+                dialog.show(supportFragmentManager, FragmentTag.PROGRESS.name)
+
+                //フォロー一覧を取得
+                val participants = task?.getParticipants()
+                ...
+            }
+            return@setOnMenuItemClickListener true
+        }
+        ...
+    }
+}
+//}
+
+TwitterTaskをフィールドに保持して、ライフサイクルイベントで
+TwitterTaskのメソッドを実行しています。
+setRootJobの呼び出しを忘れるとcancelAllが効かなくなってしまうので、
+そこだけ要注意ですね。
 

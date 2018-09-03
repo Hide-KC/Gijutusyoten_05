@@ -8,9 +8,7 @@ CHAPS:
 
 APPENDIX:
   - appendix_a.re
-  - appendix_b.re
-  - appendix_c.re
-
+  
 POSTDEF:
   - afterword.re
   - contributors.re

@@ -188,8 +188,6 @@
 @<img>{image_adp}のようなレイアウトファイルを作り、カスタムAdapter内でInflateし、
 ListViewにセットします。
 
-ここでSampleDTOは、フィールドにString nameおよびint resIdのみをもつオブジェクトです。
-
 //image[image_adp][作るListViewのイメージ]{
 //}
 
@@ -397,7 +395,7 @@ class MyLayout: ConstraintLayout{
     private latevar fuga: Float
 
     //コンストラクタは、カスタムViewと同じく３つoverride
-    constructor~~~: super(~~~){
+    constructor... {
         //ImageViewの生成、追加
         val image = ImageView(context).also{ it.id = resId }
         this.addView(image)
@@ -457,32 +455,25 @@ ConstraintLayoutの子クラスであり、ConstraintSetからモーションを
 
 //listnum[preference_xml][カスタムPreference-Layout xml]{
 <android.support.constraint.ConstraintLayout
-    //...
     android:id="@android:id/widget_frame">
 
-    <TextView
-        android:id="@android:id/title"
-        //..他要素省略
-        />
+    <TextView android:id="@android:id/title"
+        ... />
 
-    <TextView
-        android:id="@android:id/summary"
-        //..他要素省略
-        />
+    <TextView android:id="@android:id/summary"
+        ... />
 
-    <CheckBox
-        android:id="@+id/checkBox"
-        //..他要素省略
-        />
+    <CheckBox android:id="@+id/checkBox"
+        ... />
 </android.support.constraint.ConstraintLayout>
 //}
 
-title要素とsummary要素になるTextViewには、idを " @android:id/title（summary） " として付与してください。
+title要素とsummary要素になるTextViewには、idを "@android:id/title（summary）" として付与してください。
 SharedPreferences#getStringでtitle要素等が取得できるようになります。
 
-また、rootのidが " @android:id/widget_frame " でないと正常にInflateできないので、こちらも付与してください@<fn>{pref_reference}。
+また、rootは "@android:id/widget_frame" でないと正常にInflateできないので、こちらも付与してください@<fn>{pref_reference}。
 
-//footnote[pref_reference][onCreateView参照 https://developer.android.com/reference/android/preference/Preference]
+//footnote[pref_reference][onCreateViewの項参照 https://developer.android.com/reference/android/preference/Preference]
 
 コンストラクタは、カスタムViewと同様に３つoverrideします。
 
@@ -492,11 +483,7 @@ class MyPreference extends Preference{
 
 @Override
     protected View onCreateView(ViewGroup parent) {
-        super.onCreateView(parent);
-        LayoutInflater inflater = LayoutInflater.from(getContext()); 
-        
-        //TextView × 2, CheckBoxを配したレイアウトを展開する
-        return inflater.inflate(R.layout.my_preference, parent,false);
+        ...
     }
 
 @Override
@@ -522,9 +509,7 @@ class MyPreference: Preference{
 //コンストラクタのoverride
 
     override fun onCreateView(parent: ViewGroup?): View {
-        super.onCreateView(parent)
-        val inflater = LayoutInflater.from(context)
-        return inflater.inflate(R.layout.my_preference, parent, false)
+        ...
     }
 
     override fun onBindView(view: View?) {
@@ -553,20 +538,16 @@ onBindViewでプロパティ設定等の処理を行っています。onCreateVi
 
 view.setOnClickListenerでは@<img>{preference}のダイアログ表示を仕込みます。
 なお、カスタムPreferenceの内容からは離れてしまいますので詳細は省きますが、
-ダイアログのOKボタンを押した後、onBindViewが走らない@<b>{ことがある}ので、
-コールバックインターフェースを実装するなどにより確実に値更新をしてやってください。
-DialogFragmentとコールバックの実装は別途GitHubに上げておきます（あとがき参照）。
+ダイアログのOKボタンを押した後、onBindViewが走らないことがあるので、
+コールバックを実装するなどにより確実に値更新をしてやります。
 
 //footnote[onbindview][http://ksoichiro.blogspot.com/2011/05/android-preference.html]
 //footnote[dialog_result][ソフトキーボードの表示・非表示時にonBindViewが走る模様。]
 
-#@# == TabLayout
-#@# == Toolbar
-#@# == DrawerLayout
 == 非同期処理
 @<chap>{create_app}ではTwitterアプリを作りますが、Webサーバと通信する場合、
 非同期処理の実装が必要になります。
-ここでは従来のAsyncTaskによる実装、そしてKotlinのCoroutineによる実装を行います。
+ここでは従来のAsyncTaskによる実装、そしてKotlinのCoroutinesによる実装を行います。
 
 === AsyncTask
 AsyncTaskクラスは、非同期処理を実現する方法の中でもかなり簡単に実装できるクラスです。
@@ -634,7 +615,7 @@ class SampleClass{
 
 また、Kotlinで複数のメソッドをoverrideする場合は、object : AsyncTask<~>のように書く必要があります@<fn>{kotlin_object}。
 さらに@<list>{task_in_other}のように別クラスで記述する場合は、openを付けて継承可能にしないとoverrideできません。
-Kotlinは、classのみだとfinalクラスとして扱われてしまうためです。
+Kotlinは、classのみだとfinalとして扱われてしまうためです。
 
 === Coroutines
 執筆中にKotlin Fest 2018がありましたが、ちょうどCoroutinesに関する神登壇@<fn>{coroutines}があったので記述します。
@@ -645,8 +626,7 @@ async関数の中に記述します。
 
 //listnum[coroutines_gradle][依存関係の追加 app/build.gradle]{
 kotlin {
-    //書かないとlaunch関数で警告が出る
-    //無くても実行には影響なし
+    //書かないとlaunch関数で警告が出る。無くても実行には影響なし
     experimental {
         coroutines 'enable'
     }
@@ -663,36 +643,32 @@ dependencies {
 //listnum[coroutines_code][Coroutineの実装]{
 class SampleClass(){
     fun taskRun(){
-        //UIスレッド上で実行。launch関数はJobオブジェクトを返す。
+        //UIスレッド上で実行。
         launch(UI) {
             //サーバとの通信処理や時間のかかる処理
             val requestToken: String? = async {
                 try {
                     requestToken = twitter.getOAuthRequestToken(callbackUrl)
                     return@async requestToken.authenticationURL
-                } catch (e: IllegalStateException) {
-                    e.printStackTrace()
-                } catch (e: TwitterException) {
-                    e.printStackTrace()
-                }
+                } ...
                 return@async null
             }.await() //return@asyncに到達するまで待機
 
             //継続タスク
             if (requestToken != null){
-                val intent = Intent(Intent.ACTION_VIEW,
-                                     Uri.parse(requestToken))
-                context.startActivity(intent)
-            } else {
-                Log.d(javaClass.simpleName, "Authorize失敗")
+                ...
             }
         }
+        ...
     }
 }
 //}
 
 とにかく速攻で使うだけなら、@<list>{coroutines_code}のようにlaunch関数の中で
-非同期にしたい部分をasync関数で囲ってやればいいです。
+非同期にしたい部分をasync/await関数で囲ってやればいいです。
+launch関数は引数で実行するスレッドを選択でき、UIを指定するとUIスレッド上で
+タスクを実行します（＝UIの変更が可能）。何も指定しなかった場合、あるいはCommonPool（default）を指定した場合は
+別スレッドが起動し、その上でタスクを実行します（＝UIの変更が不可能）。
 
 await関数を適切な位置に設定すれば、ワーカースレッドで処理しつつUIスレッドを進行、
 結果が返ってきたらawaitで待機していた部分からUIスレッドを再開といった処理も可能です。
@@ -709,9 +685,8 @@ class SampleActivity: AppCompatActivity(){
     private var rootJob: Job? = null
     
     fun start(){
-        val job = launch(UI, parent = rootJob){...}
-        ...
-        //個別キャンセル
+        val job = launch(UI, parent = rootJob){ ... }
+        ...　//個別キャンセル
         job.cancel()
     }
 
@@ -723,13 +698,14 @@ class SampleActivity: AppCompatActivity(){
     override fun onPause(){
         super.onPause()
         //一括キャンセル
-        job?.cancel()
+        rootJob?.cancel()
+        rootJob = null
     }
 }
 //}
 
 rootJobをlaunch関数に渡すことで、Activityのライフサイクルに合わせて一括キャンセルも可能です。
-rootJobを渡すときは、名前付き引数（parent）として渡しましょう。
+rootJobを渡すときは、名前付き引数（parent）として渡します。
 
 
 //footnote[asynctask_ref][https://developer.android.com/reference/android/os/AsyncTask]
