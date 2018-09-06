@@ -188,15 +188,10 @@
 @<img>{image_adp}のようなレイアウトファイルを作り、カスタムAdapter内でInflateし、
 ListViewにセットします。
 
-//image[image_adp][作るListViewのイメージ]{
+//image[image_adp][作るListViewのイメージ][scale=0.75]{
 //}
 
 //listnum[dto][SampleDTO]{
-//Java
-class SampleDTO{
-    String name; int resId;
-}
-
 //Kotlinではdata classが使える
 data class SampleDTO{
     val name: String,
@@ -204,48 +199,7 @@ data class SampleDTO{
 }
 //}
 
-//listnum[adp_java][カスタムAdapter-Java]{
-class MyAdapter extends ArrayAdapter<SampleDTO>{
-    private LayoutInflater inflater;
-
-    public MyAdapter(Context context) {
-        super(context, android.R.layout.simple_list_item_1);
-        inflater = LayoutInflater.from(context);
-    }
-
-    @NonNull
-    @Override
-    public View getView(int position, @Nullable View convertView,
-                        @NonNull ViewGroup parent) {
-        final ItemViewHolder holder;
-
-        if(convertView == null){
-            convertView = inflater.inflate(R.layout.item_layout, null);
-            holder = new ItemViewHolder(convertView);
-            convertView.setTag(holder);
-        } else {
-            holder = (ItemViewHolder)convertView.getTag();
-        }
-
-        //DTOから各値を格納します。
-        final SampleDTO sampleDTO = getItem(position);
-        holder.name.setText(sampleDTO.name);
-        holder.image.setImageResource(sampleDTO.image));
-        return convertView;
-    }
-
-    static class ItemViewHolder{
-        TextView name;
-        ImageView image;
-        public ItemViewHolder(View view){
-            name = view.findViewById(R.id.user_name);
-            image = view.findViewById(R.id.user_image);
-        }
-    }
-}
-//}
-
-//listnum[adp_kotlin][カスタムAdapter-Kotlin]{
+//listnum[adp_kotlin][カスタムAdapter.kt]{
 class MyAdapter(context: Context):
       ArrayAdapter<SampleDTO>(context, android.R.layout.simple_list_item_1) {
     private val inflater = LayoutInflater.from(context)
@@ -273,8 +227,8 @@ class MyAdapter(context: Context):
 
 いわゆるViewHolderパターンによる実装です。
 
-紙面の都合により変な場所で改行が入っていますが、Kotlinではエルビス演算子@<fn>{elbis}（?:）と
-スコープ関数（also）により、初期化処理を簡潔に記述することができます。
+Kotlinではエルビス演算子@<fn>{elbis}（?:）とスコープ関数（also）により、
+初期化処理を一気に記述することができます。
 
 //footnote[elbis][エルビス・プレスリーのリーゼント（ポンパドール）に見えることから、だそうです。]
 
@@ -283,34 +237,7 @@ class MyAdapter(context: Context):
 =={custom_view} カスタムView
 カスタムViewはViewを継承したクラスを作り、最低限onDrawをoverrideすればOKです。
 
-//listnum[view_java][カスタムView-Java]{
-class MyView extends View{
-    public MyViewJava(Context context){
-        super(context, null); //1
-    }
-
-    public MyViewJava(Context context, AttributeSet attrs){
-        super(context, attrs); //2
-    }
-
-    public MyViewJava(Context context, AttributeSet attrs, int defStyleAttr){
-        super(context, attrs, defStyleAttr); //3
-    }
-
-    @Override
-    public void onDraw(Canvas canvas){
-        super.onDraw(canvas);
-        //円を書いたり塗りつぶしたり
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event){
-        //event.x, event.yからローカル座標取得
-    }
-}
-//}
-
-//listnum[view_kotlin][カスタムView-Kotlin]{
+//listnum[view_kotlin][カスタムView.kt]{
 class MyView: View {
     constructor(context: Context): this(context, null) //1
     constructor(context: Context, attrs: AttributeSet?):
@@ -343,6 +270,7 @@ class MyView: View {
 
 カスタムViewのコンストラクタは、少なくとも次の１～３を必ずoverrideしてください。
 overrideしないとなぜか描画されません（待て）。
+
 Qiitaの記事@<fn>{view_fn}によると次のとおり呼び出されるようです。
 
 //quote{
@@ -359,7 +287,7 @@ Qiitaの記事@<fn>{view_fn}によると次のとおり呼び出されるよう�
 
 ４つめのコンストラクタはLollipopから追加されたもので、Lollipop未満では例外を発報するため
 バージョン分岐等の措置が必要になります……が、実際overrideしなくても動きますね。
-このため@<list>{view_java}にも記載はしていません。すみません。
+このため@<list>{view_kotlin}にも記載はしていません。すみません。
 
 また、@JvmOverloadsアノテーションを付与すればもっと簡潔に記述できますが、
 既存のView（EditText等）を継承する場合は、必ずしもうまくいかない場合があるため注意してください@<fn>{extends_view}。
@@ -374,10 +302,10 @@ Viewの定義が終わったら、Android Studioのメニューバーから Buil
 @<b>{attrsは、initブロックの中からは参照はできません。}
 日本語圏では明確な答えが見つからず、少し詰みました@<fn>{attrs_sof}。
 
+見返したらイマイチ薄味な内容になってしまったので、付録に自作カラーピッカーの実装を載せておきます。よしなに。
+
 //footnote[extends_view][https://qiita.com/kwhrstr1206/items/93827190a535b11bd064]
 //footnote[attrs_sof][https://stackoverflow.com/questions/36716794/kotlin-how-to-access-the-attrs-for-a-customview]
-
-見返したらイマイチ薄味な内容になってしまったので、付録に自作カラーピッカーの実装を載せておきます。よしなに。
 
 =={custom_layout} カスタムLayout（ConstraintLayoutの拡張）
 あまり需要はないかもしれませんが、カスタムLayoutについても少し記述します。
@@ -386,7 +314,7 @@ Viewの定義が終わったら、Android Studioのメニューバーから Buil
 ConstraintLayout特有の制約（Constraint）の付け方を@<list>{constraint}に示します。
 ついでに何かと便利なGuidelineも生成します。
 
-//listnum[constraint][ConstraintLayoutの初期化-Kotlin]{
+//listnum[constraint][カスタムLayout.kt]{
 class MyLayout: ConstraintLayout{
     //Guideline用のId。フィールドに保持。
     val leftId = View.generateViewId()
@@ -443,12 +371,8 @@ ConstraintLayoutの子クラスであり、ConstraintSetからモーションを
 もっとQiitaとかで多くなってますかね。楽しみです。（自分で書け）
 
 == カスタムPreference
-１つのPreferenceにいろいろな機能をもたせたい！ではカスタムしましょう。
-
-作るのはEditTextPreferenceとCheckBoxPreferenceを足したような機能をもったPreferenceです（@<img>{preference}）。
-チェックボックスの切替及びダイアログを表示（title要素とsummary要素の編集）する機能を持っています@<fn>{preference_properties}。
-
-//footnote[preference_properties][正確には、SharedPreferences.Editor#putStringで値を書き換え、それを取得し直すカタチになります。]
+PreferenceはCheckBoxPreferenceやEditTextPreferenceなどが標準で用意されていますが、
+本項では、１つのPreferenceにCheckBoxとEdtitTextの両方の機能をもたせたPreferenceを作ります（@<img>{preference}）。
 
 //image[preference][カスタムPreference][scale=0.75]{
 //}
@@ -476,33 +400,6 @@ SharedPreferences#getStringでtitle要素等が取得できるようになりま
 //footnote[pref_reference][onCreateViewの項参照 https://developer.android.com/reference/android/preference/Preference]
 
 コンストラクタは、カスタムViewと同様に３つoverrideします。
-
-//listnum[pref_java][カスタムPreference-Java]{
-class MyPreference extends Preference{
-//コンストラクタのoverride
-
-@Override
-    protected View onCreateView(ViewGroup parent) {
-        ...
-    }
-
-@Override
-protected View onBindView(View view)
-    super.onBindeView(view);
-    //初期化処理はココ
-    view.setOnClickListener(
-        //ダイアログの表示処理
-    )
-
-    SharedPreferences prefs = getContext().getSharedPreferences(
-                                getKey(), Context.MODE_PRIVATE);
-    TextView titleView = view.findViewById(android.R.id.title);
-    titleView.setText(prefs.getString("title", "COMITIA"));
-    
-    CheckBox checkBox = view.findViewById(R.id.checkBox);
-    checkBox.setOnCheckedChangeListener( //リスナーセットしてチェック状態監視 );
-}
-//}
 
 //listnum[pref_kotlin][カスタムPreference-Kotlin]{
 class MyPreference: Preference{
@@ -555,9 +452,9 @@ AsyncTaskクラスは、非同期処理を実現する方法の中でもかな�
 
 AsyncTaskクラスを継承して書くなら@<list>{task_in_other}、匿名クラスで書くなら@<list>{task_in_noname}のようになるでしょうか。
 
-//listnum[task_in_other][継承してSampleTaskを定義-Kotlin]{
+//listnum[task_in_other][継承してSampleTaskを定義]{
 open class SampleTask: AsyncTask<Int, Float, String>() {
-    //SampleTaskクラスではworkerスレッドでの処理に集中。
+    //SampleTaskクラスではworkerスレッドでの処理に集中
     override fun doInBackground(vararg params: Int?): String {
         //workerスレッドでの処理
         return 0
@@ -565,10 +462,14 @@ open class SampleTask: AsyncTask<Int, Float, String>() {
 }
 
 class SampleClass{
-    //UI側の処理に集中するため、onPostExecuteのみoverride。
+    //UI側の処理に集中するため、doInBackground以外を必要に応じoverride
     //SampleTaskをopenにしないとoverrideできないので注意！
     fun taskRun(){
         val task = object : SampleTask(){
+            override fun onPreExecute(...){ }
+
+            override fun onProgressUpdate(...){ }
+            
             override fun onPostExecute(result: Int?) {
                 super.onPostExecute(result)
             }
@@ -577,7 +478,7 @@ class SampleClass{
 }
 //}
 
-//listnum[task_in_noname][匿名クラスでの定義-Kotlin]{
+//listnum[task_in_noname][匿名クラスでの定義]{
 class SampleClass{
     fun taskRun(){
         val task = object : AsyncTask<Int, Float, String>() {
@@ -621,7 +522,7 @@ Kotlinは、classのみだとfinalとして扱われてしまうためです。
 執筆中にKotlin Fest 2018がありましたが、ちょうどCoroutinesに関する神登壇@<fn>{coroutines}があったので記述します。
 
 次の@<list>{coroutines_code}は、TwitterアプリのOAuth認証の抜粋です。
-サーバと通信してリクエストトークンを取得していますが、通信処理はUIスレッド上で実行できない@<fn>{exception}ので、
+サーバと通信してトークンを取得していますが、通信処理はUIスレッド上で実行できない@<fn>{exception}ので、
 async関数の中に記述します。
 
 //listnum[coroutines_gradle][依存関係の追加 app/build.gradle]{
@@ -643,8 +544,7 @@ dependencies {
 //listnum[coroutines_code][Coroutineの実装]{
 class SampleClass(){
     fun taskRun(){
-        //UIスレッド上で実行。
-        launch(UI) {
+        launch(UI) {　//UIスレッド上で実行。
             //サーバとの通信処理や時間のかかる処理
             val requestToken: String? = async {
                 try {
@@ -664,18 +564,13 @@ class SampleClass(){
 }
 //}
 
-とにかく速攻で使うだけなら、@<list>{coroutines_code}のようにlaunch関数の中で
-非同期にしたい部分をasync/await関数で囲ってやればいいです。
 launch関数は引数で実行するスレッドを選択でき、UIを指定するとUIスレッド上で
 タスクを実行します（＝UIの変更が可能）。何も指定しなかった場合、あるいはCommonPool（default）を指定した場合は
-別スレッドが起動し、その上でタスクを実行します（＝UIの変更が不可能）。
-
-await関数を適切な位置に設定すれば、ワーカースレッドで処理しつつUIスレッドを進行、
-結果が返ってきたらawaitで待機していた部分からUIスレッドを再開といった処理も可能です。
-というかそっちが普通の使い方ですかね。
+スレッドプール上でタスクを実行します（＝UIの変更が不可能）。
 
 @<list>{coroutines_code}では、launch関数の引数にUIを指定しているので、
-async関数でワーカースレッド（波括弧の匿名メソッド）がスタートし、ワーカースレッドが終わるとawait関数からUIスレッド上で処理を再開します。
+async関数の匿名メソッドがスレッドプールで実行され、await関数で匿名メソッドを待機し、
+結果を受け取ったらUIスレッド上で処理を再開します。
 
 次にCoroutinesのキャンセルですが、launch関数が返すJobオブジェクトのcancelメソッドを使用します。
 
