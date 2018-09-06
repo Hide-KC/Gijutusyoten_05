@@ -374,7 +374,7 @@ ConstraintLayoutの子クラスであり、ConstraintSetからモーションを
 PreferenceはCheckBoxPreferenceやEditTextPreferenceなどが標準で用意されていますが、
 本項では、１つのPreferenceにCheckBoxとEdtitTextの両方の機能をもたせたPreferenceを作ります（@<img>{preference}）。
 
-//image[preference][カスタムPreference][scale=0.75]{
+//image[preference][カスタムPreference][scale=0.6]{
 //}
 
 //listnum[preference_xml][カスタムPreference-Layout xml]{

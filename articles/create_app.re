@@ -1,7 +1,6 @@
 ={create_app} Twitterアプリを作る
 本章では、Kotlinにて簡単なTwitterクライアントアプリ（以下、単にアプリ）の作成を行います。
-オールKotlinで記述し、@<chapref>{implements}で挙げた実装をできる限り使用してアプリを構築していきます。
-なお、開発は@<chapref>{preface}に記載のとおりAndroid Studio 3.1.4で行いますので、
+なお、開発は@<chapref>{preface}に記載のとおりAndroid Studio 3.1.4＋Kotlinで行いますので、
 インストールがまだの方は最初にインストールをお願いします。
 
 == 要件定義
@@ -15,7 +14,7 @@ OAuth認証と非同期処理ができれば、他の処理の実装もそんな
 == できるアプリ
 こんな感じのアプリができます。
 
-//image[app_image][アプリ完成イメージ][scale=0.5]{
+//image[app_image][アプリ完成イメージ][scale=0.4]{
 //}
 
 ActivityはMainActivityとOAuth認証用（View無し）の２つ、DialogFragment１つの
@@ -71,7 +70,7 @@ https://qiita.com/tdkn/items/521686c240b0c5bc6207
 申請後審査完了メールが届けば、無事開発者アカウントの登録完了です。
 
 //footnote[app_management_url][https://apps.twitter.com/]
-//footnote[guchi][なお筆者は申請から３週間弱かかりました。無理ゲー]
+//footnote[guchi][なお筆者は申請から３週間弱かかりました。]
 
 === アプリの登録
 アカウント登録が完了したら、次に作成するアプリを登録し、Consumer KeyとConsumer Secretを取得します。
@@ -79,12 +78,12 @@ KeyとSecretは、Twitter APIを通じて情報を取得するときに使用し
 
 Twitter Application Managementを開くと、次のような画面が表示されます（@<img>{app_management_top}）。
 
-//image[app_management_top][Twitter Application Managementトップ][scale=0.75]{
+//image[app_management_top][Twitter Application Managementトップ][scale=0.6]{
 //}
 
 Create New Appをクリックし、アプリの情報を入力します。
 
-//image[create_app][アプリの情報入力][scale=0.75]{
+//image[create_app][アプリの情報入力][scale=0.6]{
 //}
 
 アスタリスクが付いている項目は必須項目ですが、
@@ -636,7 +635,7 @@ onAttachでコールバック先を保持し、cancelメソッドを呼び出す
 === MainActivityの実装
 やっと最後のMainActivityの実装です。
 @<list>{main}にコードを示しますが、ライフサイクルに合わせてタスク関係の処理をoverrideしたら
-けっこう長くなってしまいました。中身はそこまで凝ったことはしておりません。
+けっこう長くなってしまいました。中身はそこまで凝ったことはしていません。
 
 //listnum[main][MainActivity.kt]{
 class MainActivity : AppCompatActivity(),
@@ -653,7 +652,7 @@ class MainActivity : AppCompatActivity(),
 
     override fun onResume() {
         super.onResume()
-        task?.setRootJob()
+        task?.createRootJob()
     }
 
     override fun onPause() {
@@ -684,13 +683,14 @@ class MainActivity : AppCompatActivity(),
             task.getParticipants()
         }
         ...
+        task = TwitterTask(this).also { it.createRootJob() }
     }
 }
 //}
 
 TwitterTaskをフィールドに保持して、ライフサイクルイベントで
 TwitterTaskのメソッドを実行しています。
-setRootJobの呼び出しを忘れるとcancelAllが効かなくなってしまうので、
+createRootJobの呼び出しを忘れるとcancelAllが効かなくなってしまうので、
 そこだけ要注意ですね。
 
 == AndroidManifestを編集する
@@ -714,12 +714,16 @@ schemeに「https」を、hostにアプリの登録で設定したCallbackURLを
 
         <data
             android:scheme="https"
-            android:host="callback" /> "https://以降の部分"
+            android:host="callback" /> "https://callback"
     </intent-filter>
 </activity>
 //}
 
 == 動作確認
 ここまで作り終わったら、いよいよアプリの起動です！
-適当にNexus5、Android API 27あたりでエミュレータをデバッグモードで起動してみてください。
+適当にNexus5、Android API 27あたりで起動してみてください。
+@<img>{app_complete}のように画面が表示されれば完成です！
+
+//image[app_complete][アプリ完成][scale=0.75]{
+//}
 
