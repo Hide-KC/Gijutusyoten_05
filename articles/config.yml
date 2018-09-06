@@ -17,13 +17,13 @@ review_version: 2.0
 # inherit: ["A.yml", "B.yml"]
 
 # ブック名(ファイル名になるもの。ASCII範囲の文字を使用)
-bookname: FirstTwitterApplication
+bookname: TwitterApplicationOnKotlin
 # 記述言語。省略した場合はja
 language: ja
 
 # 書名
 # 読みを入れる例 booktitle: {name: "Re:VIEW EPUBサンプル", file-as: "リビューイーパブサンプル"}
-booktitle: {name: "Java ＆ KotlinでTwitterアプリ作ってみた", file-as: "ジャバアンドコトリンデツイッターアプリツクッテミタ"}
+booktitle: {name: "Twitter Application on Kotlin", file-as: "ツイッターアプリケーションオンコトリン"}
 
 # 著者名。「, 」で区切って複数指定できる
 # 読みを入れる例 aut: [{name: "青木峰郎", file-as: "アオキミネロウ"}, {name: "武藤健志", file-as: "ムトウケンシ"}, {name: "高橋征義", file-as: "タカハシマサヨシ"}, {name: "角征典", file-as: "カドマサノリ"}]
@@ -51,7 +51,7 @@ aut: ["KC"]
 # a-edt, edt: 編集者
 edt: ["KC"]
 # a-ill, ill: イラストレータ
-ill: ["mzk"]
+ill: ["KC"]
 # a-lyr, lyr: 歌詞作成者
 # a-mdc, mdc: メタデータセットの一次的責任者
 # a-mus, mus: 音楽家
