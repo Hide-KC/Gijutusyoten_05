@@ -1,4 +1,8 @@
 ={implements} 実装集
+カスタムAdapter、カスタムView、カスタムLayout（ConstraintLayoutの拡張）、
+カスタムPreference、そして非同期処理の実装テンプレを集めてみました。
+個人的なまとめという側面が強いですが、開発の役に立てば幸いです。
+
 #@# 本章は、JavaとKotlinにてよくあるAndroidアプリの実装を集めました。
 #@# 本章単体でも読めますが、@<chapref>{create_app}もあわせてお読みいただければ、
 #@# より理解が深まるかと思います。
@@ -184,7 +188,7 @@
 #@# だいぶスッキリ書けますね。Kotlinはいいぞ。
 
 == カスタムAdapter
-標準のAdapterでは基本型しか扱えないので、すぐに限界がくると思います。
+ArrayAdapter<T>を拡張して、ListViewに表示する項目の見た目を変更します。
 @<img>{image_adp}のようなレイアウトファイルを作り、カスタムAdapter内でInflateし、
 ListViewにセットします。
 
@@ -229,6 +233,17 @@ class MyAdapter(context: Context):
 
 Kotlinではエルビス演算子@<fn>{elbis}（?:）とスコープ関数（also）により、
 初期化処理を一気に記述することができます。
+また、データを保持するだけのData Transfer Objectを、Kotlinではdata classとして定義できます。
+data classは自動で次のものを作ってくれます。
+
+ * equals()/hashCode()
+ * toString()
+ * componentN()関数 //プロパティ宣言順に内容を取り出す
+ * copy() //プロパティのいくつかを変更し新しいオブジェクトを生成
+
+めんどうなequals()/hashCode()/toString()のoverrideを自動でやってくれます。
+data classにはふつうにメソッド定義もできるので、データやり取りのためのクラスを作るときは
+ぜひ使っていきたいところですね。
 
 //footnote[elbis][エルビス・プレスリーのリーゼント（ポンパドール）に見えることから、だそうです。]
 

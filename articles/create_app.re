@@ -45,7 +45,7 @@ Twitter4J を使うと JSON や HTTP に詳しくなくても容易に Twitter �
 //}
 
 SNSのクライアントとの連携でとても面倒くさい（と思う）OAuth認証の実装が
-いとも簡単に行なえます。
+いとも簡単に行えます。
 それでは次節より、アプリを作っていきます。
 
 == Consumer Keyを取得する
@@ -70,11 +70,11 @@ https://qiita.com/tdkn/items/521686c240b0c5bc6207
 申請後審査完了メールが届けば、無事開発者アカウントの登録完了です。
 
 //footnote[app_management_url][https://apps.twitter.com/]
-//footnote[guchi][なお筆者は申請から３週間弱かかりました。]
+//footnote[guchi][筆者は申請から３週間弱かかりました。]
 
 === アプリの登録
 アカウント登録が完了したら、次に作成するアプリを登録し、Consumer KeyとConsumer Secretを取得します。
-KeyとSecretは、Twitter APIを通じて情報を取得するときに使用します。
+KeyとSecretはTwitter APIを通じて情報を取得するときに使用します。
 
 Twitter Application Managementを開くと、次のような画面が表示されます（@<img>{app_management_top}）。
 
@@ -108,7 +108,7 @@ Application Managementのトップに戻ると、@<img>{registered_top}のよう
 アプリをクリックし、Keys and Access TokensタブをクリックするとConsumer KeyとConsumer Secretが表示されています。
 あとからでも確認できるので、場所だけ覚えておけば大丈夫です。
 
-//image[circlefinder][Keyの取得][scale=0.75]{
+//image[circlefinder][Keyの取得]{
 //}
 
 これでキーの取得が完了しました。
