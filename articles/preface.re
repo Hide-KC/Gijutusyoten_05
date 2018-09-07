@@ -1,4 +1,9 @@
 ={preface} はじめに
+
+
+
+
+
 はじめまして、KCと申します。この度は本書を手に取っていただきましてありがとうございます。
 @<br>{}
 
@@ -20,5 +25,9 @@ Android StudioでTwitterアプリを作りました@<fn>{atogaki}。
 
 
 == 開発環境
+OS - Windows 7
+IDE - Android Studio 3.1.4
+Kotlin - 1.2.60
+
 
 

@@ -80,6 +80,6 @@ override fun colorUpdate(hue: Float, saturation: Float, brightness: Float) {
 }
 //}
 
-SBPlaneは、Huebarの変更やEditTextでRGBを直接入力等、外部からHue/Saturation/Brightnessが与えられることを前提としています。
-値の変更があれば、colorUpdateメソッドを通してビューの再描画を行います。
+SBPlaneは、Huebarの変更やEditTextでRGBを直接入力等、外部からHue/Saturation/Brightnessの変更を受信することができる構成にしてみました。
+受信にはObserverパターンを採用し、IObsever#colorUpdateを実装しています。
 
