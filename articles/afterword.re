@@ -1,6 +1,9 @@
 ={afterword} あとがき
-- FilterDialogFragmentのコールバック
 
+
+
+技術書典４に一般参加し、TechBoosterさんの「技術書をかこう！ ～はじめてのRe:VIEW～」を
+偶然手に取ったことから本書が生まれました。
 
 
 

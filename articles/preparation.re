@@ -34,7 +34,7 @@ SAM変換はもう@<list>{sam_change}を見ていただければ一目瞭然と�
 hoge.setOnClickListener(new OnClickListener() //new以降本質じゃない {
     @Override //本質じゃない
     public void onClick(View v){ //本質じゃない
-        //大事な部分
+        //実装の記述。大事な部分
     }
 }); //本質じゃない
 
@@ -42,9 +42,8 @@ hoge.setOnClickListener(new OnClickListener() //new以降本質じゃない {
 hoge.setOnClickListener { //ここに実装を記述！短い！ }
 //}
 
-Javaでoverridableなメソッドをただ１つだけ持っている場合は、大概こんな感じに書けます。
+overridableなメソッドをただ１つだけ持っている場合は、大概こんな感じに書けます。
 ただし、複数のメソッドを持っている場合はobject式を利用して実装します。
-
 また、自前で定義したインターフェースはSAM変換に対応していないようです。
 おとなしくobject式でoverrideしましょう。
 
@@ -58,7 +57,7 @@ window.addMouseListener(object : MouseAdapter() {
 === new不要、スコープ関数、型推論
 new不要は言わずもがな、インスタンス生成にnew演算子が不要です。
 スコープ関数はrun/let/with/apply/alsoの５つがあり、いろいろ使い分けがあるようですが、
-もっぱら筆者はalsoしか使っていません。覚えきれませんね……。
+もっぱら筆者はalsoしか使っていません。まだまだ覚えきれませんね……。
 
 また、インスタンス生成や関数が返す型から自動で変数の型を推論してくれるので、
 変数の型宣言をしなくてもよくなります。
@@ -68,8 +67,8 @@ val hoge = Hoge().also { it.fuga() ... }
 //}
 
 === スマートなスマートキャスト
-Javaで型チェックといえばinstanceofですが、これはifブロック内で明示的にキャストしないといけないものでした。
-Kotlinでは、is演算子を使って型チェックをすると、ブロック内ではチェック後の型に自動的に変換されます。
+Javaで型チェックといえばinstanceofですが、これはifブロック内で改めて明示的にキャストしないといけないものでした。
+Kotlinではis演算子を使って型チェックをすると、ブロック内ではチェック後の型に自動的に変換されます。
 
 //listnum[smart_cast][スマートキャスト]{
 fun demo(x: Any) {
@@ -79,7 +78,7 @@ fun demo(x: Any) {
 }
 //}
 
-findFragmentByTagで取得したFragmentを、目的の型にキャストするときなど、
+findFragmentByTagで取得したFragmentを目的の型にキャストするときなど、
 利用する場面はかなり多いと思います。
 
 === 文ではなく式という罠（if/when/try）
@@ -112,11 +111,14 @@ whenはかなり自由に値を評価して返すことができます。最高�
 
 === Kotlin Fest公式ロゴかわいい問題
 筆者ビビリなので画像転載はしませんが、かわいいです。
-ぜひKotlin Fest 2018でググって見てください。
+ぜひ「Kotlin Fest 2018」でググって見てください。
+ロゴのデザイナーはmoyo_1994氏（Twitter）のようです。
 
-デザイナーはmoyo_1994氏（Twitter）のようです。
+connpassのKotlin Fest 2018のページでは、そのときの
+登壇資料がすべてアップされていますので是非ご覧になることをお勧めします。
+特にCoroutinesのスライドは、本書を執筆するにあたってとても参考になりました。
 
-//footnote[husanka][実はこれだけKotlin推しておきながら、Kotlin Festの存在を当日知りました。チケット制なので参加できず。無念。]
+//footnote[husanka][実はこれだけKotlin推しておきながら、Kotlin Festの存在を当日知りました。チケット制なので参加できず。次回こそは…！]
 
 == Kotlinのここがだめ！
  * すっきりすぎてて、慣れないと読めないかも
@@ -126,7 +128,7 @@ whenはかなり自由に値を評価して返すことができます。最高�
 スコープ関数使ってたりすると初見◯しになりかねません。
 まあこの際、初見の人をKotlin沼に引きずり込むなどすれば万事OKと思います@<fn>{pennywise}。
 
-JavaはKotlin変換機能で全置換してしまいましょう（過激派）。
+あとJavaはKotlin変換機能で全置換してしまいましょう（過激派）。
 Kotlin変換後はnull許容型やval/varの修正が必要になると思いますが、
 Kotlinの恩恵を享受できると考えれば苦ではないですね@<fn>{slide}。
 
