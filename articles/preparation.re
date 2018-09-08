@@ -1,5 +1,5 @@
 ={preparation} Kotlinはいいぞ
-== Kotlinのここがいい！
+== Kotlinのここがすごい！
  * ぬるぽに厳しい！
  * SAM変換ですっきり！
  * new不要！
