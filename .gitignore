@@ -2,6 +2,8 @@ node_modules
 Gemfile.lock
 *.pdf
 *.epub
+*.psd
 
 articles/*.html
 素材/
+表紙/
