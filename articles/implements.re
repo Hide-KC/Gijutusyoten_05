@@ -195,7 +195,7 @@ ListViewにセットします。
 //image[image_adp][作るListViewのイメージ][scale=0.75]{
 //}
 
-//listnum[dto][SampleDTO]{
+//listnum[dto][SampleDTO.kt]{
 //Kotlinではdata classが使える
 data class SampleDTO{
     val name: String,
@@ -231,7 +231,7 @@ class MyAdapter(context: Context):
 
 いわゆるViewHolderパターンによる実装です。
 
-Kotlinではエルビス演算子@<fn>{elbis}（?:）とスコープ関数（also）により、
+Kotlinではエルビス演算子（?:）@<fn>{elbis}とスコープ関数（also）により、
 初期化処理を一気に記述することができます。
 また、データを保持するだけのData Transfer Objectを、Kotlinではdata classとして定義できます。
 data classは自動で次のものを作ってくれます。
@@ -245,7 +245,7 @@ data classは自動で次のものを作ってくれます。
 data classにはふつうにメソッド定義もできるので、データやり取りのためのクラスを作るときは
 ぜひ使っていきたいところですね。
 
-//footnote[elbis][エルビス・プレスリーのリーゼント（ポンパドール）に見えることから、だそうです。]
+//footnote[elbis][右に倒すとエルビス・プレスリーのリーゼント（ポンパドール）に見えることから、だそうです。]
 
 #@# === StickyListHeadersListView
 
@@ -312,9 +312,9 @@ Viewの定義が終わったら、Android Studioのメニューバーから Buil
 あとは他のViewと同じようにxmlで配置してください。
 
 なお、地味にネットでは見つけにくい情報ですが、Kotlinでセカンダリコンストラクタを宣言し、
-さらにobtainStyledAttributesメソッドで独自定義の識別子の値を取得する場合、
+さらにobtainStyledAttributesメソッドで静的にセットした独自定義の識別子の値を取得する場合、
 ３つめのコンストラクタの後に初期化ブロックを続けて記述することで、attrsを参照することができます。
-@<b>{attrsは、initブロックの中からは参照はできません。}
+別途initブロックを作っても、@<b>{attrsはinitブロックの中からは参照はできません。}
 日本語圏では明確な答えが見つからず、少し詰みました@<fn>{attrs_sof}。
 
 見返したらイマイチ薄味な内容になってしまったので、付録に自作カラーピッカーの実装を載せておきます。よしなに。
@@ -376,11 +376,11 @@ class MyLayout: ConstraintLayout{
 }
 //}
 
-constraintSetにcloneして、制約を付けた（connect）後、applyToで適用します。
+constraintSetにcloneして、各種制約を付けた（connect）後、applyToで適用します。
 @<list>{constraint}では、コードで生成したImageViewのTopとLeft（START）をGuidelineに、BottomとRight（END）を親コンテナに紐づけてます。
 親コンテナのIDはConstraintSet.PARENT_IDで取得できます。
 
-ところでこの節を執筆中（8月上旬）、新たにMotionLayoutが発表されました。
+ところでこの節を執筆中、新たにMotionLayoutが発表されました。
 ConstraintLayoutの子クラスであり、ConstraintSetからモーションを設定できるようです。
 今はリリースされたばかりで解説が少ないですが、技術書典が開催される10月ごろには
 もっとQiitaとかで多くなってますかね。楽しみです。（自分で書け）
@@ -408,15 +408,15 @@ PreferenceはCheckBoxPreferenceやEditTextPreferenceなどが標準で用意さ�
 //}
 
 title要素とsummary要素になるTextViewには、idを "@android:id/title（summary）" として付与してください。
-SharedPreferences#getStringでtitle要素等が取得できるようになります。
+SharedPreferences#getStringでtitle（summary）要素が取得できるようになります。
 
-また、rootは "@android:id/widget_frame" でないと正常にInflateできないので、こちらも付与してください@<fn>{pref_reference}。
+またrootは "@android:id/widget_frame" でないと正常にInflateできないので、こちらも付与してください@<fn>{pref_reference}。
 
 //footnote[pref_reference][onCreateViewの項参照 https://developer.android.com/reference/android/preference/Preference]
 
-コンストラクタは、カスタムViewと同様に３つoverrideします。
+コンストラクタはカスタムViewと同様に３つoverrideします。
 
-//listnum[pref_kotlin][カスタムPreference-Kotlin]{
+//listnum[pref_kotlin][カスタムPreference.kt]{
 class MyPreference: Preference{
 //コンストラクタのoverride
 
@@ -450,15 +450,15 @@ onBindViewでプロパティ設定等の処理を行っています。onCreateVi
 
 view.setOnClickListenerでは@<img>{preference}のダイアログ表示を仕込みます。
 なお、カスタムPreferenceの内容からは離れてしまいますので詳細は省きますが、
-ダイアログのOKボタンを押した後、onBindViewが走らないことがあるので、
-コールバックを実装するなどにより確実に値更新をしてやります。
+ダイアログのOKボタンを押した後、onBindViewが走らないことがある@<fn>{dialog_result}ので、
+コールバックを実装するなどにより確実に値更新をしてやったほうが安心です。
 
 //footnote[onbindview][http://ksoichiro.blogspot.com/2011/05/android-preference.html]
 //footnote[dialog_result][ソフトキーボードの表示・非表示時にonBindViewが走る模様。]
 
 == 非同期処理
 @<chap>{create_app}ではTwitterアプリを作りますが、Webサーバと通信する場合、
-非同期処理の実装が必要になります。
+通信処理中にアプリの応答不可を回避するための非同期処理が必要になります。
 ここでは従来のAsyncTaskによる実装、そしてKotlinのCoroutinesによる実装を行います。
 
 === AsyncTask
@@ -584,10 +584,17 @@ launch関数は引数で実行するスレッドを選択でき、UIを指定す
 スレッドプール上でタスクを実行します（＝UIの変更が不可能）。
 
 @<list>{coroutines_code}では、launch関数の引数にUIを指定しているので、
-async関数の匿名メソッドがスレッドプールで実行され、await関数で匿名メソッドを待機し、
-結果を受け取ったらUIスレッド上で処理を再開します。
+CoroutinesはUIスレッド上で実行されます。
+処理がasync関数まで到達すると、async関数の匿名メソッドがスレッドプールで実行され、
+再びawait関数までUIスレッド上で処理が進行します。
+await関数に到達すると匿名メソッドの結果が返るまでCoroutinesは中断され、
+結果を受け取ったらUIスレッド上で処理を再開します@<fn>{asyncawait}。
 
-次にCoroutinesのキャンセルですが、launch関数が返すJobオブジェクトのcancelメソッドを使用します。
+#@# async関数の処理中はCoroutinesは中断されているため、UIスレッドの操作が可能になります。
+
+//footnote[asyncawait][厳密に言えば違うようなのですが、動作的にはこのような動きになります。もう少し勉強します。]
+
+次にCoroutinesのキャンセルです（@<list>{coroutines_cancel}）。
 
 //listnum[coroutines_cancel][Coroutinesのキャンセル]{
 class SampleActivity: AppCompatActivity(){
@@ -614,9 +621,11 @@ class SampleActivity: AppCompatActivity(){
 }
 //}
 
-rootJobをlaunch関数に渡すことで、Activityのライフサイクルに合わせて一括キャンセルも可能です。
-rootJobを渡すときは、名前付き引数（parent）として渡します。
+個別のCoroutinesのキャンセルは、launch関数が返すJobオブジェクトのcancelメソッドを使用します。
 
+一方rootJobを生成しlaunch関数に渡すと、rootJob.cancelをコールすることで一括キャンセルすることもできます。
+Activity等のライフサイクルに応じてrootJobを生成・キャンセルすることで、
+Activity破棄後でもバックグラウンドでCoroutinesが動いてしまうことを防止できます。
 
 //footnote[asynctask_ref][https://developer.android.com/reference/android/os/AsyncTask]
 //footnote[kotlin_object][オブジェクト式 https://dogwood008.github.io/kotlin-web-site-ja/docs/reference/object-declarations.html]
