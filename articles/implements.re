@@ -317,7 +317,7 @@ Viewの定義が終わったら、Android Studioのメニューバーから Buil
 別途initブロックを作っても、@<b>{attrsはinitブロックの中からは参照はできません。}
 日本語圏では明確な答えが見つからず、少し詰みました@<fn>{attrs_sof}。
 
-見返したらイマイチ薄味な内容になってしまったので、付録に自作カラーピッカーの実装を載せておきます。よしなに。
+@<chap>{create_color_picker}にて自作カラーピッカーの実装を載せておきます。よしなに。
 
 //footnote[extends_view][https://qiita.com/kwhrstr1206/items/93827190a535b11bd064]
 //footnote[attrs_sof][https://stackoverflow.com/questions/36716794/kotlin-how-to-access-the-attrs-for-a-customview]

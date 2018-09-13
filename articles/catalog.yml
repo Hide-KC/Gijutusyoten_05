@@ -5,10 +5,8 @@ CHAPS:
   - preparation.re
   - implements.re
   - create_app.re
+  - create_color_picker.re
 
-APPENDIX:
-  - appendix_a.re
-  
 POSTDEF:
   - afterword.re
   - contributors.re

@@ -17,11 +17,11 @@ Javaの冗長な記述が削られ、ぬるぽの可能性が潰され、変換�
  1. Kotlinはいいぞ（@<chap>{preparation}）
  2. カスタムView周り、非同期処理の実装（@<chap>{implements}）
  3. TwitterアプリをKotlinで作る（@<chap>{create_app}）
+ 4. カスタムViewを作る（@<chap>{create_color_picker}）
 
 特に@<chap>{preparation}は、深夜のテンションで一気に書いたので無駄に熱いです@<fn>{nekonda}。
-カスタムViewについては、カラーピッカーを自作したのでその実装の概要を載せています（@<chap>{appendix_a}）。
-意外とググってもないんですよね、View単体の実装の話。
-@<chap>{create_app}および@<chap>{appendix_a}のコード全容はGitHubにありますので、
+カスタムViewについては、カラーピッカーを自作したのでその実装を載せています（@<chap>{create_color_picker}）。
+@<chap>{create_app}および@<chap>{create_color_picker}のコード全容はGitHubにありますので、
 そちらも参考にしていただければと思います。まえがきの一番最後にリポジトリ掲載していますのでよしなに。
 
 == 対象とする読者
