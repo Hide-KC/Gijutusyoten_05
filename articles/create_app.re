@@ -727,3 +727,15 @@ schemeに「https」を、hostにアプリの登録で設定したCallbackURLを
 //image[app_complete][アプリ完成][scale=0.75]{
 //}
 
+== まとめ
+ポイントは次のとおりです。
+
+ * アプリを登録してConsumerKeyを取得する
+ * OAuth認証にてAccessTokenを取得する
+ * ConsumerKey, AccessTokenをセットしたTwitterオブジェクトを介して好きに情報を取得する
+
+TwitterAPIはさまざまなメソッドが用意されているので、
+いろいろと試してみるといいと思います。
+筆者はフォロー一覧取得を利用して、即売会参加者を抽出するアプリを作ってみました。
+
+みなさんもTwitter4Jを使ってよき開発ライフを！

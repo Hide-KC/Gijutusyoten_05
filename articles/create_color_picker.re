@@ -98,7 +98,7 @@ interface IColorObserver{
 }
 
 interface ColorChangeListener{
-    //変更発報用。最終的にSubject#notifyを叩く
+    //更新用。最終的にSubject#notifyを叩く
     fun changed(hsb: HSB)
 }
 //}
@@ -400,9 +400,11 @@ DialogFragment#showで各Viewの操作ができれば完成です。
 
  1. IObserverを実装したViewを作る
  2. Subjectを作る
- 3. （Activityを経由して）DialogFragmentでnotifyを叩く処理を書く
+ 3. DialogFragmentでnotifyを叩く処理を書く
  4. colorUpdateの処理を定義する
+
+本当はActivityを経由せずにDialogFragment内だけで完結できれば
+よかったのですが、執筆中にいい案が浮かばなかったのでこのような実装になりました。
 
 本書で作成したファイルはTwitterClientAppのリポジトリに同梱されているので、
 そちらも参照いただければと思います。
-
