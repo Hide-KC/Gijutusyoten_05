@@ -1,7 +1,4 @@
 ={create_color_picker} カラーピッカーを作成してみる
-アプリを作成する中で、どうしてもカラーピッカーが欲しかったので作ってみました。
-本章はそのカラーピッカーの実装の解説になります。
-
 もともと付録として概要のみ記載する予定でしたが、予想以上に締切に余裕があったので
 @<chap>{create_color_picker}としてめでたく昇華されました。なぜわざわざ自分を追い込むのか。
 
@@ -12,7 +9,7 @@
 == できるもの
 最終的には@<img>{img_dialog}のように、DialogFragmentとして表示するようにします。
 
-//image[img_dialog][ColorPickerDialogFragment.kt][scale=0.6]{
+//image[img_dialog][ColorPickerDialogFragment.kt][scale=0.5]{
 //}
 
 カラーピッカーはHSB（HSV）形式で表現します。
@@ -51,11 +48,8 @@ Observerパターンは通称GoF本@<fn>{gof_book}の振る舞いに関するデ
 
 //footnote[gof_book][いわずと知れた「オブジェクト指向における再利用のためのデザインパターン」]
 
-== クラス図とシーケンス図
-カラーピッカーのクラス図とシーケンス図は次のようになります。
-
-//image[class_diagram][クラス図]{
-//}
+== シーケンス図
+カラーピッカーのシーケンス図は次のようになります（@<img>{sequence_diagram}）。
 
 //image[sequence_diagram][シーケンス図]{
 //}
@@ -67,7 +61,7 @@ Viewから直接Subjectを参照するとめちゃくちゃになりますので
 発報用のインターフェースを介してSubjet#notifyを叩くようにしてみました@<fn>{getcontext}。
 Subject自体はDialogFragmentのフィールドに保持するようにします。
 
-//footnote[getcontext][getContextがColorPickerDialogFragmentであればMainActivityに実装する必要はないのですが、ViewからFragmentを取得するのは無理な模様…？]
+//footnote[getcontext][getContextがColorPickerDialogFragmentであればMainActivityに実装する必要はないのですが、ViewからFragmentを取得するのは無理な模様。]
 
 == 実装
 実装は次の順で行っていきます。
@@ -225,8 +219,8 @@ class SBPlane : HSBView, IColorObserver {
             val endColor
              = Color.HSVToColor(floatArrayOf(hue, x_i / 100f, 0f))
 
-            //ここでの座標系の数値入力は意味が無さそう
-            lg = LinearGradient(0f, 0f, 0f , 0f,
+            lg = LinearGradient(x_i*unit , 0f,
+                                x_i*unit , viewSize.height*1f,
                                 startColor, endColor,
                                 Shader.TileMode.CLAMP)
             paint.shader = lg
@@ -255,18 +249,19 @@ class SBPlane : HSBView, IColorObserver {
 }
 //}
 
-ちょっと長いですが、ざっくりいうと次のように処理をしています。
+ちょっと長いですが、ざっくりと次のように処理をしています。
 
  * onMeasure - SBPlaneのサイズからグラデーション線の幅を決定する
  * onDraw - 開始色と終端色をHSBから決定し、View上に100本線を描画する
  * onTouchEvent - タッチ座標からHSBを作成し、ColorChangeListener#changedを発報する
  * colorUpdate - HSBをセットして再描画する
 
-onTouchEventがトリガーとなってObserverの更新イベントが発報します。
+onTouchEventがトリガーとなってObserverの更新イベントを発報させます。
+
 もうお察しいただいているかもしれませんが、発報させたView自身も
 Observerであるため、めぐりめぐってcolorUpdateが実行されます。
 この辺は明らかに無駄な処理となってしまいますので、
-hsb.equals()などでpostInvaridateOnAnimationの実行を避けた方が軽くなりそうです。
+hsb.equalsなどでpostInvaridateOnAnimationの実行を避けた方が軽くなりそうです。
 
 === 色相バー、ObservableなTextView
 HueBarはSeekbarを継承、ObservableTextViewはTextViewを継承した上でIColorObserverを実装します（@<list>{extend_view}）。

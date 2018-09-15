@@ -4,12 +4,11 @@
 
 2017年5月にKotlinがAndroidの正式な開発言語になったのを受け、
 さまざまなサイトや書籍でKotlinを見かけるようになりました。
-
 そんな中で、筆者自身Kotlinは2018年3月18日頃（Twitter調べ）から触り始めましたが、
 Javaの冗長な記述が削られ、ぬるぽの可能性が潰され、変換機能でJavaとの互換性もある程度保たれ、
 いいことづくめの言語ですね！書いてて楽しいです。
+
 本書を読んでいただけることで、少しでもKotlinに興味をもっていただければ著者冥利に尽きるというものです。
-@<br>{}
 
 == 本書の構成
 本書の構成は次のようになっています。
@@ -17,7 +16,7 @@ Javaの冗長な記述が削られ、ぬるぽの可能性が潰され、変換�
  1. Kotlinはいいぞ（@<chap>{preparation}）
  2. カスタムView周り、非同期処理の実装（@<chap>{implements}）
  3. TwitterアプリをKotlinで作る（@<chap>{create_app}）
- 4. カスタムViewを作る（@<chap>{create_color_picker}）
+ 4. カラーピッカーを作る（@<chap>{create_color_picker}）
 
 特に@<chap>{preparation}は、深夜のテンションで一気に書いたので無駄に熱いです@<fn>{nekonda}。
 カスタムViewについては、カラーピッカーを自作したのでその実装を載せています（@<chap>{create_color_picker}）。
