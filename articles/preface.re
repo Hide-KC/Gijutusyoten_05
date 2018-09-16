@@ -18,13 +18,15 @@ Javaの冗長な記述が削られ、ぬるぽの可能性が潰され、変換�
  3. TwitterアプリをKotlinで作る（@<chap>{create_app}）
  4. カラーピッカーを作る（@<chap>{create_color_picker}）
 
-特に@<chap>{preparation}は、深夜のテンションで一気に書いたので無駄に熱いです@<fn>{nekonda}。
-カスタムViewについては、カラーピッカーを自作したのでその実装を載せています（@<chap>{create_color_picker}）。
-@<chap>{create_app}および@<chap>{create_color_picker}のコード全容はGitHubにありますので、
+@<chap>{preparation}は、Kotlinの基本的な仕様について記載しています。深夜のテンションで一気に書いたので無駄に熱いです@<fn>{nekonda}。
+@<chap>{implements}では、カスタムAdapter、View、Layout、Preference、そして非同期処理のテンプレ実装について記載しています。
+@<chap>{create_app}では、Twitter4Jというライブラリを用いてKotlinでTwitterアプリを作成します。
+@<chap>{create_color_picker}では、カスタムViewの実装例として自作したカラーピッカーについて記載しています。
+@<chap>{create_app}および@<chap>{create_color_picker}のコードの全容はGitHubにありますので、
 そちらも参考にしていただければと思います。まえがきの一番最後にリポジトリ掲載していますのでよしなに。
 
-== 対象とする読者
- * Androidアプリこれから作ろうという方
+== 想定する読者層
+ * Androidアプリをこれから作ろうという方
  * AndroidアプリをJavaで書いている方
  * AndroidでTwitterアプリを作ろうかなとぼんやり思っている方
  * Kotlinの魅力をまだご存知ない方
@@ -63,4 +65,4 @@ Sdkは一応KitKat以後を想定しています。
 == サンプルアプリのリポジトリ
 サンプルアプリ（カラーピッカー同梱）のリポジトリは次のとおりです。
  
-TwitterCliantApp - https://github.com/Hide-KC/TwitterClientApp.git 
+ * TwitterCliantApp - https://github.com/Hide-KC/TwitterClientApp.git 

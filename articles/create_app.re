@@ -6,7 +6,7 @@
 == 要件定義
 アプリの要件は次の１件だけ。
 
- * フォロー一覧から技術書典の参加者を抽出して表示する。
+ * フォロー一覧から技術書典の参加者を抽出して一覧表示する。
 
 その他ふぁぼRTやリプライ機能は今回は実装しません。
 OAuth認証と非同期処理ができれば、他の処理の実装もそんなに難しくないと思います。
@@ -17,7 +17,7 @@ OAuth認証と非同期処理ができれば、他の処理の実装もそんな
 //image[app_image][アプリ完成イメージ][scale=0.4]{
 //}
 
-ActivityはMainActivityとOAuth認証用（View無し）の２つ、DialogFragment１つの
+ActivityはMainActivityとOAuth認証用（View無し）の２つ、それとDialogFragment１つの
 超シンプル構成です。
 
 == Twitter4Jの利用
@@ -44,8 +44,7 @@ Twitter4J を使うと JSON や HTTP に詳しくなくても容易に Twitter �
  * Twitter API 1.1に完全対応
 //}
 
-SNSのクライアントとの連携でとても面倒くさい（と思う）OAuth認証の実装が
-いとも簡単に行えます。
+SNSのクライアントとの連携でとても面倒くさい（と思う）OAuth認証の実装が簡単に行えます。
 それでは次節より、アプリを作っていきます。
 
 == Consumer Keyを取得する
@@ -56,7 +55,7 @@ SNSのクライアントとの連携でとても面倒くさい（と思う）OA
 
 登録はTwitter Application Management@<fn>{app_management_url}を開いて、
 Twitterアカウントでサインインしてください。開発者アカウントは事前に携帯電話番号の入力が必要なので、
-開発者用に別アカウントを用意してもいいですね。
+開発用に別アカウントを用意してもいいですね。
 
 筆者はアカウント登録済みなので、登録の流れについては
 次のQiitaを参考にしてください。
@@ -92,6 +91,7 @@ CallbackURLはOAuth認証の際に必要になるので、実質必須項目で�
 CallbackURLは「https://」から始まる適当な（ただし存在しない）URLを入力します。存在しなければ適当でかまいません。
 以前のTwitterAPIではカスタムスキーマを設定することで、「twitter://callback」などが
 使用できましたが、現在はカスタムスキーマが禁止されてしまいました。
+後で登録もできるので、スルーしても大丈夫です。
 
 OAuth認証が完了すると、ここで設定したURLにTwitterがリダイレクト→アプリ側でフック→アプリに戻ってくるという流れです。
 実際の実装は後述します。
@@ -351,7 +351,7 @@ class ConfirmOAuthActivity : AppCompatActivity() {
 //listnum[oauth_core][TwitterOAuth.kt]{
 class TwitterOAuth(private val context: Context) {
     ...
-    //認証開始。Coroutinesで処理してみる。
+    //認証開始。Coroutinesで処理してみる
     fun startAuthorize(){
         launch(UI) {
             val requestToken: String? = async {
@@ -364,7 +364,8 @@ class TwitterOAuth(private val context: Context) {
 
             if (requestToken != null){
                 //Webブラウザを起動して認証ページを表示
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(requestToken))
+                val intent = Intent
+                             (Intent.ACTION_VIEW, Uri.parse(requestToken))
                 context.startActivity(intent)
             } else {
                 Log.d(javaClass.simpleName, "RequestToken取得失敗")
@@ -406,7 +407,7 @@ Deferred#await()でgetOAuthAccessTokenの結果を待機しています。
 AccessTokenが正常に返ってくればOAuth認証完了です！
 
 ==={extract_participants} 参加者一覧抽出クラス
-ここで、このアプリの要件は「フォロー一覧から技術書典の参加者を抽出して表示する」ことだったので、
+ここで、このアプリの要件は「フォロー一覧から技術書典の参加者を抽出して一覧表示する」ことだったので、
 まず「フォロー一覧」を取得し、次に「参加者を抽出」という手順で実装します。
 フォロー一覧はgetFriendsIDsメソッド及びlookupUsersメソッドを組み合わせて行います。
 
@@ -417,17 +418,15 @@ getFriendsIDsが15分間で15回まで呼び出せるので最大7.5万アカウ
 900回までなので最大9万アカウントまで対応できます。
 
 //listnum[tasks][TwitterTask.kt - コールバックインターフェース定義]{
-class TwitterTask(private val context:Context) {
-    //MainActivityに実装するインターフェース
-    interface TwitterTaskListener{
-        fun setInitCount(count: Int)
-        fun update(count: Int)
-        fun complete(participants: List<User>?)
-    }
+//MainActivityに実装するインターフェース
+interface TwitterTaskListener{
+    fun setInitCount(count: Int)
+    fun update(count: Int)
+    fun complete(participants: List<User>?)
 }
 //}
 
-次の@<list>{task_method}は、フォロー一覧取得と参加者抽出のコードです。
+@<list>{task_method}は、フォロー一覧取得と参加者抽出のコードです。
 
 //listnum[task_method][TwitterTask.kt - メソッド]{
 fun createRootJob() { rootJob = Job() }
@@ -444,11 +443,13 @@ fun getParticipants(){
         try {
             var ids: IDs
             do { //自身のIDを引数として渡す
-                ids = async{ twitter.getFriendsIDs(twitter.id, cursor) }.await()
+                ids = async{
+                    twitter.getFriendsIDs(twitter.id, cursor)
+                    }.await()
                 val max = Math.ceil(ids.iDs.size / 100.0).toInt()
                 for (count in 0 until max){ //100個ずつ区切って格納
-                    idsList.add(ids.iDs
-                        .sliceArray(count*100 until (count+1)*100))
+                    idsList.add
+                            (ids.iDs.sliceArray(count*100 until (count+1)*100))
                 }
                 cursor = ids.nextCursor //次のページ
             } while (ids.hasNext())
@@ -480,13 +481,14 @@ fun getParticipants(){
 
 キャンセル処理はrootJob.cancelの一括キャンセルのみ記述していますが、
 たとえばMap<Key, Job>を作って個別に管理することも可能です。
-TwitterTask内でキャンセルを行っていますが、呼び出し側でsetRootJobを忘れると
+TwitterTask内でキャンセルを行っていますが、呼び出し側でcreateRootJobを忘れると
 一括キャンセルが効かないので、そこだけ注意が必要ですね。もっとよい実装がある気がします。
 
 基本的には、Activityのライフサイクルに合わせてonResume/onPauseで
 createRootJob及びcancelAllを呼べば大丈夫です。
 
-サークルスペースは正規表現を使用してマッチングしています（@<list>{string_matcher}）。
+次に、技術書典参加者を抽出するためのStringMatcherを作ります。
+参加者は正規表現を利用して抽出します（@<list>{string_matcher}）。
 
 //listnum[string_matcher][StringMatcher.kt]{
 object StringMatcher {
@@ -537,7 +539,7 @@ class ParticipantsAdapter(context: Context):
         holder.screenName.text = "@" + item.screenName
         holder.circleSpace.text = StringMatcher.getCircleSpace(item.name)
         holder.icon.setOnClickListener{
-            //プロフィールページを公式アプリで起動するなど。
+            //プロフィールページを公式アプリで起動するなど
             val profileUrl = "twitter://user?screen_name=" + item.screenName
             ...
         }
@@ -597,6 +599,7 @@ class ProgressDialogFragment: DialogFragment() {
     override fun onAttach(context: Context?) {
         super.onAttach(context)
         if (context is ICancel){
+            //MainActivityをICancelにキャストして保持
             cancellable = context
         }
     }
@@ -628,7 +631,7 @@ onAttachでコールバック先を保持し、cancelメソッドを呼び出す
 ここはいろいろとやりようがあると思いますので、お好きな方法で実装してみてください。
 
 ただし、無いとは思いますが、コールバック先をコンストラクタで保持して、
-クラス固有のメソッドをコールするような真似はいけません…それはいけない……。@<fn>{ikenai}
+クラス固有のメソッドをコールするような真似はいけません……。@<fn>{ikenai}
 
 //footnote[ikenai][オブジェクト指向もカプセル化もよく知らないまま作ってた頃はよくやってました（遠い目）]
 
@@ -643,7 +646,7 @@ class MainActivity : AppCompatActivity(),
                      TwitterTask.TwitterTaskListener {
     override fun update(count: Int) {
         ...
-        progressDialogFragment.setCount(count)
+        fragment.setCount(count)
     }
 
     override fun onActivityResult(...) {
@@ -652,7 +655,7 @@ class MainActivity : AppCompatActivity(),
 
     override fun onResume() {
         super.onResume()
-        task?.createRootJob()
+        task.createRootJob()
     }
 
     override fun onPause() {
@@ -720,9 +723,9 @@ schemeに「https」を、hostにアプリの登録で設定したCallbackURLを
 //}
 
 == 動作確認
-ここまで作り終わったら、いよいよアプリの起動です！
+ここまで作り終わったら、いよいよアプリの起動です。
 適当にNexus5、Android API 27あたりで起動してみてください。
-@<img>{app_complete}のように画面が表示されれば完成です！
+@<img>{app_complete}のように画面が表示されれば完成です！お疲れさまでした。
 
 //image[app_complete][アプリ完成][scale=0.75]{
 //}

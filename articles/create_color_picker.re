@@ -32,7 +32,9 @@ DialogFragmentに表示するViewとして、次のものを作ります。
  ** TextViewを継承
 
 HueBar及びObservableTextViewは、直接Viewを継承せずに簡易的に作成しました。
-また上記３つのViewは、相互に連携して状態を変えるためにObserverパターンを適用します。
+また上記３つのViewは、相互に連携して状態を変えるためにObserverパターンを適用します@<fn>{attension}。
+
+//footnote[attension][考え方の応用ということで、GoF本との差異は指摘しないであげてください。]
 
 == Observerパターン
 Observerパターンは通称GoF本@<fn>{gof_book}の振る舞いに関するデザインパターンのひとつで、
@@ -118,9 +120,9 @@ fun changed(hsb: HSB) {
 }
 //}
 
-ColorChangeListener#changed -> ColorPickerDialogFragment#changedをコールします。
+ColorChangeListener#changed→ColorPickerDialogFragment#changedをコールします。
 Fragment側のchangedは単にnotifyを叩くために用意したメソッドなので、名称はなんでも構いません。
-これで、イベント発報 -> MainActivity -> DialogFragmentのSubject#notify -> View更新、の流れができました。
+これで、イベント発報→MainActivity→DialogFragmentのSubject#notify→View更新、の流れができました。
 
 === Subjectクラス
 今回はSubjectに特別抽象クラスが必要なわけではないですが、
@@ -165,9 +167,6 @@ IColorObserverのcolorUpdateが実行されます。
 //listnum[abstract_view][HSBView.kt]{
 abstract class HSBView : View {
     ...
-    var mAlpha: Float = 0f
-        set(value){ field = value.coerceIn(0f..1f) }
-
     var hue: Float = 0f
         set(value){
             var degree = value
@@ -215,9 +214,9 @@ class SBPlane : HSBView, IColorObserver {
         val unit = viewSize.width / 100f
         for (x_i in 0 until 100){
             val startColor
-             = Color.HSVToColor(floatArrayOf(hue, x_i / 100f, 1f))
+                = Color.HSVToColor(floatArrayOf(hue, x_i / 100f, 1f))
             val endColor
-             = Color.HSVToColor(floatArrayOf(hue, x_i / 100f, 0f))
+                = Color.HSVToColor(floatArrayOf(hue, x_i / 100f, 0f))
 
             lg = LinearGradient(x_i*unit , 0f,
                                 x_i*unit , viewSize.height*1f,
@@ -252,11 +251,11 @@ class SBPlane : HSBView, IColorObserver {
 ちょっと長いですが、ざっくりと次のように処理をしています。
 
  * onMeasure - SBPlaneのサイズからグラデーション線の幅を決定する
- * onDraw - 開始色と終端色をHSBから決定し、View上に100本線を描画する
+ * onDraw - 開始色と終端色を決定し、View上に100本線を描画する
  * onTouchEvent - タッチ座標からHSBを作成し、ColorChangeListener#changedを発報する
  * colorUpdate - HSBをセットして再描画する
 
-onTouchEventがトリガーとなってObserverの更新イベントを発報させます。
+onTouchEventがトリガーとなって、Subject#notifyを実行しに行きます。
 
 もうお察しいただいているかもしれませんが、発報させたView自身も
 Observerであるため、めぐりめぐってcolorUpdateが実行されます。
@@ -315,7 +314,7 @@ class ObservableTextView(context: Context, attrs: AttributeSet)
 
 HueBarはバーのつまみを動かしたとき（onProgressChanged）にColorChangeListener#changedを実行するようにします。
 onProgressChangedはDialogFragment#onCreateDialog内で実装するため、
-progressChangedを間に挟んでchangedを実行するようにしました。
+progressChangedを間に挟んでchangedを実行するようにしました（@<list>{colorpicker_dialog}）。
 
 ObservableTextViewはRGBそれぞれの値を表示する必要があるため、
 次節にてsetObserverで匿名メソッドを渡してやります。
@@ -354,7 +353,7 @@ override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
                 ...
                 override fun onProgressChanged(...)
                 {
-                    subject.notify(HSB(it.getFloatProgress(),
+                    subject.notify(HSB(it.getProgressAsFloat(),
                                         it.saturation,
                                         it.brightness))
                 }

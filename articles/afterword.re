@@ -28,15 +28,15 @@ Coroutines早くExperimental外れるがよいぞ。
 @<br>{}
 
 @<chap>{create_color_picker}ではObserverパターンをGoF本に沿ってごりごり実装しましたが、
-これはたぶんLiveDataを使えばもっと簡単に実装できると思います。
-LiveDataはObserverパターンを適用しており、TechBoosterさんの新刊で詳しく説明されているので、
+これはLiveDataを使えばもっと簡単に実装できると思います。
+LiveDataはObserverパターンが適用されており、TechBoosterさんの新刊で詳しく説明されているので、
 むしろベタなObserverパターンで本書いたほうが@<del>{ページ数も稼げるし}おもしろいんじゃないか？
 と思って書いてみました。
 
 一応別の実装パターンも考えてみました。
 
  * pull型（updateに引数なし）にしてSubjectにHSBを持たせる
- ** Subjectの参照をどう取得するか -> Mediatorパターンになりそうだったので×
+ ** Subjectの参照をどう取得するか→Mediatorパターンになりそうだったので×
  * SubjectをActivityに持たせてActivityでnotify叩けば？
  ** Fragmentが破棄されてもViewへの参照が残る危険があるので×
  * LiveData使えば？
