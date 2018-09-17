@@ -267,6 +267,10 @@ Consumer KeyとConsumer Secretは本来ユーザから見えないように組�
 === OAuth認証関係クラス
 Twitterを自作アプリから操作する場合、操作するアカウント固有のAccessTokenを取得しなければなりません。
 このAccessTokenを取得するための操作がOAuth認証となります。
+認証の簡単なフローチャートは@<img>{oauth_flow}のようになります。
+
+//image[oauth_flow][OAuth認証フローチャート]{
+//}
 
 さて、まずはTwitterオブジェクトを生成するためのSingletonなTwitterUtilsクラスを作成します。
 
