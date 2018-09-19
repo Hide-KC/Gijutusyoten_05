@@ -1,6 +1,6 @@
 ={preparation} Kotlinはいいぞ
 KotlinはJavaのいいとこどりみたいな言語ですが、本章ではその特徴を見ていきます。
-Javaに慣れ親しんだ方ですと、Null-safetyやSAM変換の仕様に少し戸惑うかもしれません。
+Javaに慣れている方は、Null-safetyやSAM変換の仕様に少し戸惑うかもしれません。
 
 == Kotlinのここがすごい！
  * ぬるぽに厳しい！
